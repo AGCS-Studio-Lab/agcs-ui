@@ -1,10 +1,11 @@
 /* ============================================================
    AGCS UI -- grid de construccion para apps   v0.2 (2026-09-24)
    ============================================================
-   El grid de los decks llevado a pantalla. En los decks es 40px de
-   paso y 3px de linea a 4K; visto en una pantalla de 1280 eso es
-   ~13px y 1px. Aqui: 16px (multiplo de 8, la base del espaciado de
-   las apps) y 1px, con la misma transparencia de la marca v5.2.
+   El grid de los decks llevado a pantalla, con el mismo formato. En
+   los decks es 48px de paso y 3px de linea a 4K (agcs-design-system
+   v5.6); visto en una pantalla de 1280 eso es exactamente 16px y 1px.
+   Aqui: 16px (multiplo de 8, la base del espaciado de las apps) y 1px,
+   con la misma transparencia de la marca v5.2.
 
    Va en cuatro lugares y en ningun otro (docs/grid.md):
      1. la entrada de cada modulo (el encabezado),

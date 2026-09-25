@@ -20,7 +20,9 @@ lugar que no está en la lista es un defecto.
 
 - **16px.** Las apps espacian en múltiplos de 8. Con 16 caen sobre líneas
   los espacios de 16, 32, 48 y 64; con 24 solo 24 y 48; con 32, solo 32 y 64.
-  También es la textura del grid de los decks vista en una pantalla de 1280.
+  Es el mismo formato que el grid de los decks: desde agcs-design-system
+  v5.6 (25 de septiembre) los decks usan 48px a 4K, que en una pantalla de
+  1280 se ven como 16px.
 - **1px y la misma transparencia de la marca v5.2.** La línea mide 1.23:1
   contra el fondo en los dos modos: el mismo peso que la skill dataviz pide
   para una línea de escala (1.24 a 1.29). Por eso puede ser la escala de un
