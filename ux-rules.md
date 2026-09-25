@@ -39,6 +39,7 @@ La marca prohíbe sombra y radio: la jerarquía se construye **solo con espacio,
 
 - **Un lime por grupo, máximo tres por pantalla** (menú / dato del contenido / selección). El dato del contenido es el foco principal. Es un mínimo antes que un máximo: **una pantalla sin lime es un defecto**, igual que dos lime en el mismo grupo. Cada lime lleva una marca negra (borde o franja). El botón principal va en negro. Detalle en `docs/color.md` §2.
 - **Separación por espacio y hairline** (border 1px Mist o gris del sistema), no por cards con sombra. Agrupa por proximidad; grid de 8pt.
+- **Grid de construcción** (`.agcs-grid`, 16px): solo en la entrada de módulo, los estados vacíos, los lienzos de diagramas y los gráficos de barras que lo usan como escala. En ningún otro lugar. Condiciones en `docs/grid.md`.
 - **3 niveles de texto** por peso y color, no por tamaño solo. Diseña legible en gris primero.
 - **Tipografía v5:** título N27 (`.agcs-display` / `font-title`) · subtítulo **Crimson Pro SemiBold Italic** (`.agcs-subtitle` / `font-subtitle`; v3 lo tenía en IBM Plex Sans, retirado el 2026-09-02) · texto IBM Plex Mono (`font-body`, ~14-16px). Mono-dominante.
 - **Header de página (patrón fijo):** eyebrow mono `<Chevron /> SECCIÓN · contexto` (`.agcs-label`) + título display.
@@ -48,6 +49,7 @@ La marca prohíbe sombra y radio: la jerarquía se construye **solo con espacio,
 - **Lo esencial primero**; ≤ **4-5 KPIs** por vista, el detalle a drill-down.
 - **Ningún número solo**: agrega comparación (meta / período previo / delta) + estado label-driven.
 - **El gráfico correcto**: barras para comparar (**eje SIEMPRE desde cero**), líneas para tendencia, tabla cuando importa el valor exacto. **Sin pie/donut** — barras horizontales ordenadas.
+- **Barras sobre el grid**: solo si el grid es la escala (`alignedBars()` en `src/grid-chart.js`). **El dato nunca se redondea** para caer en una línea.
 - **Maximiza data-ink** (Tufte): sin 3D, gridlines hairline si acaso, sin relleno decorativo. Redondea y abrevia ($3.8M).
 - **Color en gráficos**: por defecto todo en gris y **lime para UN dato**. Para comparar series (países, áreas), los **siete colores de series** en orden fijo (`docs/color.md` §5); el usuario puede reasignar solo países y áreas, dentro de esos siete. Los colores de estado solo cuando el dato ES ese estado, y nunca en el mismo gráfico que las series. Nunca paletas categóricas arbitrarias.
 - Etiqueta directo sobre la barra/línea; evita leyendas de ida y vuelta.

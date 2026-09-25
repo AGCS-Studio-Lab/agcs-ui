@@ -7,7 +7,8 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { BRAND, GRAYS, BLUE, STATES, SERIES, SURFACES, RESERVED } from "../src/palette.js";
+import { BRAND, GRAYS, BLUE, STATES, SERIES, SURFACES, RESERVED, GRID } from "../src/palette.js";
+import { alignedBars } from "../src/grid-chart.js";
 import { deltaE, deltaECvd, contrast, apca, oklch } from "../src/color-math.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -87,6 +88,25 @@ const lc = apca(BRAND.paper, STATES.redFill);
 pass(lc >= 60, "texto blanco sobre rojo de fondo, APCA", `${lc.toFixed(1)} (minimo 60)`);
 const la = deltaE(BRAND.lime, STATES.amber), lac = deltaECvd(BRAND.lime, STATES.amber);
 pass(la >= 15 && lac >= 8, "lime y ambar se distinguen", `${la.toFixed(1)} normal · ${lac.toFixed(1)} daltonismo`);
+
+/* 4. Grid */
+console.log("\nGrid");
+const gcss = readFileSync(join(root, "tokens/grid.css"), "utf8");
+pass(gcss.includes(`--grid-step: ${GRID.step}px`) && gcss.includes("rgba(0, 0, 0, 0.09)") && gcss.includes("rgba(255, 255, 255, 0.11)"),
+  "tokens/grid.css coincide con src/palette.js", `${GRID.step}px · 9% · 11%`);
+pass(GRID.step % 8 === 0, "el paso es multiplo de 8", `${GRID.step}px`);
+for (const mode of ["light", "dark"]) {
+  const { rgb, alpha } = GRID.line[mode], bg = mode === "light" ? 255 : 0;
+  const v = rgb.map((c) => Math.round(bg * (1 - alpha) + c * alpha));
+  const hex = "#" + v.map((c) => c.toString(16).padStart(2, "0")).join("").toUpperCase();
+  const cr = contrast(hex, SURFACES[mode]);
+  pass(cr >= 1.15 && cr <= 1.35, `peso de linea de escala (${mode === "light" ? "claro" : "oscuro"})`, `${hex} · ${cr.toFixed(2)}:1 (dataviz: 1.24 a 1.29)`);
+}
+const g = alignedBars([5, 6, 9, 3, 1, 2]);
+const snapped = g.width % g.step === 0 && g.height % g.step === 0 && (g.baseline + 1) % g.step === 0 && g.bars.every((b) => (b.x + 1) % g.step === 0 && b.width % g.step === 0);
+pass(snapped, "grafico alineado: todo en pasos enteros", `${g.width}x${g.height}px · 1 linea = ${g.unit}`);
+const money = alignedBars([4.4, 7.25]);
+pass(money.bars[0].height === (4.4 / money.unit) * money.step, "grafico alineado: el dato no se redondea", `4.4 -> ${money.bars[0].height.toFixed(1)}px`);
 
 console.log(failures ? `\n${failures} prueba(s) fallan. No cambies la paleta hasta que pasen.\n` : "\nTodo pasa.\n");
 process.exit(failures ? 1 : 0);

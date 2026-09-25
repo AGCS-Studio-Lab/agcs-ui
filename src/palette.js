@@ -52,3 +52,10 @@ export const SERIES = {
   },
   other: { light: "#9A9A9A", dark: "#6B6B6B" },
 };
+
+/** Grid de construccion para apps (docs/grid.md, 2026-09-24). */
+export const GRID = {
+  step: 16,
+  lineWidth: 1,
+  line: { light: { rgb: [0, 0, 0], alpha: 0.09 }, dark: { rgb: [255, 255, 255], alpha: 0.11 } },
+};

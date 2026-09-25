@@ -1,0 +1,40 @@
+/* ============================================================
+   AGCS UI -- grid de construccion para apps   v0.2 (2026-09-24)
+   ============================================================
+   El grid de los decks llevado a pantalla. En los decks es 40px de
+   paso y 3px de linea a 4K; visto en una pantalla de 1280 eso es
+   ~13px y 1px. Aqui: 16px (multiplo de 8, la base del espaciado de
+   las apps) y 1px, con la misma transparencia de la marca v5.2.
+
+   Va en cuatro lugares y en ningun otro (docs/grid.md):
+     1. la entrada de cada modulo (el encabezado),
+     2. los estados vacios,
+     3. los lienzos de diagramas,
+     4. los graficos de barras, solo si el grid ES su escala.
+   Tablas, texto y el resto de los graficos van planos.
+
+   En apps se puede usar var(): el problema de los decks con var()
+   era del renderer de export a Express y PDF, que aqui no existe.
+   ============================================================ */
+
+:root {
+  --grid-step: 16px;
+  --grid-line-w: 1px;
+  --grid-line: rgba(0, 0, 0, 0.09);        /* ~#E8E8E8 sobre blanco, 1.23:1 */
+}
+
+.dark,
+[data-mode="dark"] {
+  --grid-line: rgba(255, 255, 255, 0.11);  /* ~#1C1C1C sobre negro, 1.23:1 */
+}
+
+/* Las lineas se corren 1px hacia arriba y a la izquierda: asi quedan en
+   k * paso - 1, y el borde de un bloque que mide pasos enteros cae justo
+   sobre una linea. El elemento tiene que medir pasos enteros de alto. */
+.agcs-grid {
+  background-image:
+    linear-gradient(to right,  var(--grid-line) var(--grid-line-w), transparent var(--grid-line-w)),
+    linear-gradient(to bottom, var(--grid-line) var(--grid-line-w), transparent var(--grid-line-w));
+  background-size: var(--grid-step) var(--grid-step);
+  background-position: calc(var(--grid-line-w) * -1) calc(var(--grid-line-w) * -1);
+}
