@@ -1,0 +1,80 @@
+/* ============================================================
+   AGCS UI -- Tailwind v4   v0.1 (2026-09-24)
+   ============================================================
+   Para agcs-management-system (Next + Tailwind v4). Se importa
+   despues de `@import "tailwindcss";` y de tokens/colors.css.
+
+   `inline` hace que las clases apunten a los roles, asi que
+   cambian solas entre modo claro y oscuro.
+
+   Los grises de Tailwind se reemplazan por los de AGCS: `gray-*`
+   deja de ser el gris de Tailwind. Los otros grises de Tailwind
+   (slate, zinc, neutral, stone) no se deben usar.
+   ============================================================ */
+
+@theme inline {
+  /* marca */
+  --color-obsidian: var(--agcs-obsidian);
+  --color-paper:    var(--agcs-paper);
+  --color-lime:     var(--agcs-lime);
+  --color-carbon:   var(--agcs-carbon);
+  --color-mist:     var(--agcs-mist);
+  --color-data:     var(--agcs-data);
+
+  /* grises */
+  --color-gray-50:  var(--agcs-gray-50);
+  --color-gray-100: var(--agcs-gray-100);
+  --color-gray-200: var(--agcs-gray-200);
+  --color-gray-300: var(--agcs-gray-300);
+  --color-gray-400: var(--agcs-gray-400);
+  --color-gray-500: var(--agcs-gray-500);
+  --color-gray-600: var(--agcs-gray-600);
+  --color-gray-700: var(--agcs-gray-700);
+  --color-gray-800: var(--agcs-gray-800);
+  --color-gray-900: var(--agcs-gray-900);
+
+  /* escala azul: bg-data-100 ... bg-data-900 */
+  --color-data-100: var(--agcs-blue-100);
+  --color-data-200: var(--agcs-blue-200);
+  --color-data-300: var(--agcs-blue-300);
+  --color-data-400: var(--agcs-blue-400);
+  --color-data-500: var(--agcs-blue-500);
+  --color-data-600: var(--agcs-blue-600);
+  --color-data-700: var(--agcs-blue-700);
+  --color-data-800: var(--agcs-blue-800);
+  --color-data-900: var(--agcs-blue-900);
+
+  /* roles */
+  --color-surface:   var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink:       var(--ink);
+  --color-ink-2:     var(--ink-2);
+  --color-ink-3:     var(--ink-3);
+  --color-rule:      var(--rule);
+  --color-highlight: var(--highlight);
+  --color-highlight-edge: var(--highlight-edge);
+
+  /* estados: bg-warn text-warn-ink / bg-risk text-risk-ink */
+  --color-warn:      var(--state-warn-bg);
+  --color-warn-ink:  var(--state-warn-ink);
+  --color-risk:      var(--state-risk-bg);
+  --color-risk-ink:  var(--state-risk-ink);
+  --color-chart-risk: var(--chart-risk);
+
+  /* texto con color: text-error / text-link / text-info */
+  --color-error: var(--text-error);
+  --color-link:  var(--text-link);
+  --color-info:  var(--text-info);
+
+  /* series: stroke-series-1, bg-series-1 ... */
+  --color-series-1: var(--series-1);
+  --color-series-2: var(--series-2);
+  --color-series-3: var(--series-3);
+  --color-series-4: var(--series-4);
+  --color-series-5: var(--series-5);
+  --color-series-6: var(--series-6);
+  --color-series-7: var(--series-7);
+  --color-series-other: var(--series-other);
+
+  --radius: 0rem;
+}

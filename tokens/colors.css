@@ -1,0 +1,159 @@
+/* ============================================================
+   AGCS UI -- tokens de color para apps   v0.1 (2026-09-24)
+   ============================================================
+   La marca vive en agcs-design-system y manda. Este archivo
+   agrega lo que una app necesita y un deck no: grises, estados
+   con su texto, tonos para texto, series para graficos y la
+   escala azul. Las reglas estan en docs/color.md y cada valor
+   pasa `node tools/check-palette.mjs`.
+
+   Dos capas:
+     1. Primitivos  --agcs-*   valores fijos, nunca cambian de modo.
+     2. Roles       --surface, --ink, --state-*, --series-* ...
+                    cambian entre modo claro y oscuro.
+   El codigo de las apps usa los roles. Los primitivos solo se
+   usan para definir roles.
+   ============================================================ */
+
+:root {
+  /* ---- Marca (agcs-design-system v5.4, sin cambios) -------------- */
+  --agcs-obsidian: #000000;
+  --agcs-paper:    #FFFFFF;
+  --agcs-lime:     #C8FF29;
+  --agcs-carbon:   #1A1A1A;
+  --agcs-mist:     #E5E5E5;
+  --agcs-data:     #00A1F1;   /* azul de marca: serie 1, mapas de calor, enlaces sobre negro */
+  --agcs-risk:     #ED1C24;   /* rojo de marca: datos de riesgo en graficos, texto de error sobre negro */
+
+  /* ---- Grises: diez pasos parejos en OKLCH ------------------------ */
+  /* Incluyen Mist (200), el muted de marca (600) y Carbon (900).
+     Reemplazan los grises sueltos de las apps. */
+  --agcs-gray-50:  #FAFAFA;
+  --agcs-gray-100: #F2F2F2;
+  --agcs-gray-200: #E5E5E5;
+  --agcs-gray-300: #D1D1D1;
+  --agcs-gray-400: #B4B4B4;
+  --agcs-gray-500: #9A9A9A;
+  --agcs-gray-600: #6B6B6B;
+  --agcs-gray-700: #505050;
+  --agcs-gray-800: #353535;
+  --agcs-gray-900: #1A1A1A;
+
+  /* ---- Escala azul: un solo tono, de claro a oscuro --------------- */
+  /* Para mapas de calor y magnitudes. 500 es el azul de marca. */
+  --agcs-blue-100: #E1F1FE;
+  --agcs-blue-200: #BAE0FF;
+  --agcs-blue-300: #89CCFF;
+  --agcs-blue-400: #4FB7FE;
+  --agcs-blue-500: #00A1F1;
+  --agcs-blue-600: #0382C3;
+  --agcs-blue-700: #05699F;   /* tambien es el azul para texto sobre blanco */
+  --agcs-blue-800: #02527E;
+  --agcs-blue-900: #003C5D;
+
+  /* ---- Estados y texto (decisiones del 2026-09-24) ---------------- */
+  --agcs-amber:     #FFB800;  /* "En riesgo". Reemplaza a #FFFF00 solo en apps: el amarillo se confundia con el lime */
+  --agcs-red-fill:  #E31A22;  /* fondo de "Guardrail cruzado" y alertas, siempre con texto blanco */
+  --agcs-red-text:  #8E1116;  /* texto de error sobre blanco */
+  --agcs-blue-text: #05699F;  /* enlaces y mensajes del sistema sobre blanco */
+
+  /* ---- Series, tema AGCS: siete colores en orden fijo ------------- */
+  --agcs-series-1-light: #00A1F1;  --agcs-series-1-dark: #0495DE;  /* azul datos */
+  --agcs-series-2-light: #8B9D1E;  --agcs-series-2-dark: #859712;  /* oliva */
+  --agcs-series-3-light: #4F39EC;  --agcs-series-3-dark: #5341F3;  /* violeta */
+  --agcs-series-4-light: #04A99B;  --agcs-series-4-dark: #07A295;  /* verde agua */
+  --agcs-series-5-light: #805C03;  --agcs-series-5-dark: #B38309;  /* ocre */
+  --agcs-series-6-light: #CE84A7;  --agcs-series-6-dark: #BD7598;  /* rosa */
+  --agcs-series-7-light: #4369A2;  --agcs-series-7-dark: #32669A;  /* azul marino */
+  --agcs-series-other-light: #9A9A9A;  --agcs-series-other-dark: #6B6B6B;  /* "Otros" */
+  /* El tema Alto contraste esta validado pero no se ofrece: ver src/series.js. */
+}
+
+/* ============================================================
+   Roles -- modo claro (por defecto)
+   ============================================================ */
+:root {
+  --surface:    var(--agcs-paper);
+  --surface-2:  var(--agcs-gray-50);
+  --ink:        var(--agcs-carbon);
+  --ink-2:      var(--agcs-gray-700);
+  --ink-3:      var(--agcs-gray-600);
+  --rule:       var(--agcs-mist);
+  --grid:       var(--agcs-gray-100);
+  --baseline:   var(--agcs-carbon);
+
+  /* Lime: uno por grupo, maximo tres por pantalla, siempre con una marca negra.
+     Se llama highlight y no accent porque shadcn ya usa --accent para el hover. */
+  --highlight:      var(--agcs-lime);
+  --highlight-ink:  var(--agcs-obsidian);
+  --highlight-edge: var(--agcs-obsidian);
+
+  /* Borde de campos de formulario: necesita 3:1 contra el fondo, Mist no alcanza */
+  --field-edge: var(--agcs-gray-600);
+
+  /* Graficos en modo enfasis: todo en gris y un dato en lime */
+  --chart-rest:  var(--agcs-carbon);
+  --chart-focus: var(--agcs-lime);
+
+  /* Estados: la etiqueta escrita dice el estado, el color la refuerza */
+  --state-ok-bg:     transparent;
+  --state-ok-ink:    var(--agcs-carbon);
+  --state-ok-edge:   var(--agcs-carbon);
+  --state-warn-bg:   var(--agcs-amber);
+  --state-warn-ink:  var(--agcs-obsidian);
+  --state-risk-bg:   var(--agcs-red-fill);
+  --state-risk-ink:  var(--agcs-paper);
+
+  /* Texto con color: solo errores, enlaces y mensajes del sistema */
+  --text-error: var(--agcs-red-text);
+  --text-link:  var(--agcs-blue-text);
+  --text-info:  var(--agcs-blue-text);
+
+  /* Marcas de grafico que SON riesgo */
+  --chart-risk: var(--agcs-risk);
+
+  --series-1: var(--agcs-series-1-light);
+  --series-2: var(--agcs-series-2-light);
+  --series-3: var(--agcs-series-3-light);
+  --series-4: var(--agcs-series-4-light);
+  --series-5: var(--agcs-series-5-light);
+  --series-6: var(--agcs-series-6-light);
+  --series-7: var(--agcs-series-7-light);
+  --series-other: var(--agcs-series-other-light);
+}
+
+/* ============================================================
+   Roles -- modo oscuro
+   `.dark` es la clase que usa shadcn; `[data-mode="dark"]` para el resto.
+   ============================================================ */
+.dark,
+[data-mode="dark"] {
+  --surface:    var(--agcs-obsidian);
+  --surface-2:  var(--agcs-carbon);
+  --ink:        var(--agcs-paper);
+  --ink-2:      var(--agcs-gray-300);
+  --ink-3:      var(--agcs-gray-500);
+  --rule:       var(--agcs-gray-800);
+  --grid:       var(--agcs-carbon);
+  --baseline:   var(--agcs-gray-500);
+
+  --highlight-edge: var(--agcs-lime);   /* sobre negro el lime ya destaca solo */
+  --field-edge:     var(--agcs-gray-500);
+  --chart-rest:  var(--agcs-gray-600);
+
+  --state-ok-ink:  var(--agcs-paper);
+  --state-ok-edge: var(--agcs-paper);
+
+  --text-error: var(--agcs-risk);    /* 4.8:1 sobre negro */
+  --text-link:  var(--agcs-data);    /* 7.4:1 sobre negro */
+  --text-info:  var(--agcs-data);
+
+  --series-1: var(--agcs-series-1-dark);
+  --series-2: var(--agcs-series-2-dark);
+  --series-3: var(--agcs-series-3-dark);
+  --series-4: var(--agcs-series-4-dark);
+  --series-5: var(--agcs-series-5-dark);
+  --series-6: var(--agcs-series-6-dark);
+  --series-7: var(--agcs-series-7-dark);
+  --series-other: var(--agcs-series-other-dark);
+}

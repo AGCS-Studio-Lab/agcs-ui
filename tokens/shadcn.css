@@ -1,0 +1,63 @@
+/* ============================================================
+   AGCS UI -- puente para shadcn/ui   v0.1 (2026-09-24)
+   ============================================================
+   Lleva los roles de shadcn a los de tokens/colors.css, para que
+   los componentes de shadcn salgan con la marca sin tocarlos.
+   Se importa despues de tokens/colors.css.
+
+   Radio 0 y sin sombra: la marca no los usa. El boton principal
+   va en negro, porque el lime queda para el dato de cada grupo.
+   ============================================================ */
+
+:root {
+  --radius: 0rem;
+
+  --background:           var(--surface);
+  --foreground:           var(--ink);
+  --card:                 var(--surface);
+  --card-foreground:      var(--ink);
+  --popover:              var(--surface);
+  --popover-foreground:   var(--ink);
+
+  --primary:              var(--agcs-obsidian);
+  --primary-foreground:   var(--agcs-paper);
+  --secondary:            var(--agcs-gray-100);
+  --secondary-foreground: var(--ink);
+  --muted:                var(--agcs-gray-100);
+  --muted-foreground:     var(--ink-3);
+  --accent:               var(--agcs-gray-100);   /* hover de shadcn, no es el lime */
+  --accent-foreground:    var(--ink);
+  --destructive:          var(--agcs-red-fill);
+  --destructive-foreground: var(--agcs-paper);
+
+  --border:               var(--rule);
+  --input:                var(--field-edge);
+  --ring:                 var(--agcs-obsidian);
+
+  --chart-1: var(--series-1);
+  --chart-2: var(--series-2);
+  --chart-3: var(--series-3);
+  --chart-4: var(--series-4);
+  --chart-5: var(--series-5);
+
+  --sidebar:                    var(--surface);
+  --sidebar-foreground:         var(--ink-2);
+  --sidebar-primary:            var(--agcs-lime);      /* item activo del menu: uno por grupo */
+  --sidebar-primary-foreground: var(--agcs-obsidian);
+  --sidebar-accent:             var(--agcs-gray-100);
+  --sidebar-accent-foreground:  var(--ink);
+  --sidebar-border:             var(--rule);
+  --sidebar-ring:               var(--agcs-obsidian);
+}
+
+.dark,
+[data-mode="dark"] {
+  --primary:              var(--agcs-paper);
+  --primary-foreground:   var(--agcs-obsidian);
+  --secondary:            var(--agcs-carbon);
+  --muted:                var(--agcs-carbon);
+  --accent:               var(--agcs-carbon);
+  --ring:                 var(--agcs-paper);
+  --sidebar-accent:       var(--agcs-carbon);
+  --sidebar-ring:         var(--agcs-paper);
+}
