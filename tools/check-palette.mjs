@@ -92,15 +92,17 @@ pass(la >= 15 && lac >= 8, "lime y ambar se distinguen", `${la.toFixed(1)} norma
 /* 4. Grid */
 console.log("\nGrid");
 const gcss = readFileSync(join(root, "tokens/grid.css"), "utf8");
-pass(gcss.includes(`--grid-step: ${GRID.step}px`) && gcss.includes("rgba(0, 0, 0, 0.09)") && gcss.includes("rgba(255, 255, 255, 0.11)"),
-  "tokens/grid.css coincide con src/palette.js", `${GRID.step}px · 9% · 11%`);
+pass(gcss.includes(`--grid-step: ${GRID.step}px`) && gcss.includes("rgba(0, 0, 0, 0.06)") && gcss.includes("rgba(255, 255, 255, 0.08)"),
+  "tokens/grid.css coincide con src/palette.js", `${GRID.step}px · 6% · 8%`);
 pass(GRID.step % 8 === 0, "el paso es multiplo de 8", `${GRID.step}px`);
 for (const mode of ["light", "dark"]) {
   const { rgb, alpha } = GRID.line[mode], bg = mode === "light" ? 255 : 0;
   const v = rgb.map((c) => Math.round(bg * (1 - alpha) + c * alpha));
   const hex = "#" + v.map((c) => c.toString(16).padStart(2, "0")).join("").toUpperCase();
   const cr = contrast(hex, SURFACES[mode]);
-  pass(cr >= 1.15 && cr <= 1.35, `peso de linea de escala (${mode === "light" ? "claro" : "oscuro"})`, `${hex} · ${cr.toFixed(2)}:1 (dataviz: 1.24 a 1.29)`);
+  // Max pidio el grid mas claro (2026-09-25): queda mas suave que la linea de escala
+  // de dataviz (1.24 a 1.29). El piso es 1.10, la linea mas suave que se sigue viendo.
+  pass(cr >= 1.10 && cr <= 1.35, `se ve, sin competir (${mode === "light" ? "claro" : "oscuro"})`, `${hex} · ${cr.toFixed(2)}:1 (piso 1.10; dataviz pide 1.24 a 1.29)`);
 }
 const g = alignedBars([5, 6, 9, 3, 1, 2]);
 const snapped = g.width % g.step === 0 && g.height % g.step === 0 && (g.baseline + 1) % g.step === 0 && g.bars.every((b) => (b.x + 1) % g.step === 0 && b.width % g.step === 0);

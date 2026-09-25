@@ -57,5 +57,5 @@ export const SERIES = {
 export const GRID = {
   step: 16,
   lineWidth: 1,
-  line: { light: { rgb: [0, 0, 0], alpha: 0.09 }, dark: { rgb: [255, 255, 255], alpha: 0.11 } },
+  line: { light: { rgb: [0, 0, 0], alpha: 0.06 }, dark: { rgb: [255, 255, 255], alpha: 0.08 } },  // v5.6: antes 0.09 / 0.11
 };

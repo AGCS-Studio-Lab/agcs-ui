@@ -5,7 +5,8 @@
    los decks es 48px de paso y 3px de linea a 4K (agcs-design-system
    v5.6); visto en una pantalla de 1280 eso es exactamente 16px y 1px.
    Aqui: 16px (multiplo de 8, la base del espaciado de las apps) y 1px,
-   con la misma transparencia de la marca v5.2.
+   con la misma transparencia de los decks: 6% sobre blanco y 8% sobre
+   negro (v5.6, 2026-09-25; antes 9% y 11%).
 
    Va en cuatro lugares y en ningun otro (docs/grid.md):
      1. la entrada de cada modulo (el encabezado),
@@ -21,12 +22,12 @@
 :root {
   --grid-step: 16px;
   --grid-line-w: 1px;
-  --grid-line: rgba(0, 0, 0, 0.09);        /* ~#E8E8E8 sobre blanco, 1.23:1 */
+  --grid-line: rgba(0, 0, 0, 0.06);        /* ~#F0F0F0 sobre blanco, 1.14:1 */
 }
 
 .dark,
 [data-mode="dark"] {
-  --grid-line: rgba(255, 255, 255, 0.11);  /* ~#1C1C1C sobre negro, 1.23:1 */
+  --grid-line: rgba(255, 255, 255, 0.08);  /* ~#141414 sobre negro, 1.14:1 */
 }
 
 /* Las lineas se corren 1px hacia arriba y a la izquierda: asi quedan en
