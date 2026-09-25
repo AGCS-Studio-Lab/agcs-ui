@@ -1,0 +1,29 @@
+<!doctype html>
+<!-- @dsCard group="Color" name="Lime · uno por grupo" subtitle="Máximo tres por pantalla · siempre con marca negra · botón principal en negro" viewport="700x250" -->
+<html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<style>
+.scr { display: grid; grid-template-columns: 150px 1fr; border: 1px solid var(--rule); }
+.nav { border-right: 1px solid var(--rule); padding: 10px 0; display: grid; align-content: start; }
+.nav span { font: 500 9.5px/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; padding: 9px 12px; color: var(--ink-2); }
+.nav .on { background: var(--highlight); color: #000; border-left: 4px solid #000; padding-left: 8px; }
+.main { padding: 12px 16px; display: grid; gap: 10px; }
+.bars { display: flex; align-items: flex-end; gap: 10px; height: 70px; border-bottom: 1px solid var(--baseline); }
+.bars i { display: block; width: 26px; background: var(--chart-rest); }
+.bars i.f { background: var(--highlight); outline: 1px solid #000; outline-offset: -1px; }
+table { border-collapse: collapse; width: 100%; font-size: 10px; }
+td { padding: 6px 8px; border-bottom: 1px solid var(--rule); }
+tr.sel td { background: var(--highlight); color: #000; }
+tr.sel td:first-child { border-left: 4px solid #000; }
+.btn { justify-self: end; font: 500 9.5px/1 var(--font-mono); letter-spacing: .06em; text-transform: uppercase; background: #000; color: #fff; padding: 9px 12px; }
+</style></head>
+<body>
+  <div class="scr">
+    <div class="nav"><span class="on">Explore Portfolio</span><span>Incubation Labs</span><span>Scale Launchpad</span></div>
+    <div class="main">
+      <span class="btn">Nuevo bet</span>
+      <div class="bars"><i style="height:38%"></i><i style="height:46%"></i><i class="f" style="height:90%"></i><i style="height:26%"></i><i style="height:12%"></i></div>
+      <table><tr><td>Onboarding sin sucursal</td><td>Chile</td></tr><tr class="sel"><td>Pago en tienda con QR</td><td>México</td></tr></table>
+    </div>
+  </div>
+  <p class="note" style="margin:10px 0 0">Menú: dónde estás · gráfico: el dato que importa (foco principal) · tabla: lo que elegiste. Nunca dos lime en el mismo grupo.</p>
+</body></html>

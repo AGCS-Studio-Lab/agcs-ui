@@ -1,11 +1,14 @@
-# AGCS UI
+# AGCS · Apps
+
+Repo `agcs-ui` · en Claude Design: **AGCS · Apps**.
+
 
 La capa de interfaz de las apps de AGCS | Studio + Lab |: los tokens, las
 reglas y los primitivos de marca que usan `agcs-management-system`,
 `agcs-dris-system` y las apps que vengan.
 
 La marca vive en [`agcs-design-system`](https://github.com/AGCS-Studio-Lab/agcs-design-system)
-y manda sobre este repo. Ese repo está hecho para decks y documentos, con
+(en Claude Design: **AGCS · Decks y documentos**) y manda sobre este repo. Ese repo está hecho para decks y documentos, con
 tokens a 4K y herramientas de export. Este agrega lo que una pantalla necesita
 y un deck no: grises, estados con su texto, colores de series, personalización
 y reglas de UX. Donde algo de aquí choque con la marca, se corrige aquí.
@@ -18,6 +21,7 @@ y reglas de UX. Donde algo de aquí choque con la marca, se corrige aquí.
 | `tokens/shadcn.css` | Lleva los roles de shadcn/ui a los de AGCS. Radio 0, botón principal en negro. |
 | `tokens/tailwind-v4.css` | `@theme` para Tailwind v4 (management). |
 | `tokens/tailwind-v3.cjs` | Preset para Tailwind v3 (DRIS). |
+| `tokens/fonts.css` | Carga las caras de la marca desde `fonts/` (N27, IBM Plex Mono, Crimson Pro SemiBold Italic). Sin CDN. |
 | `tokens/grid.css` | El grid de construcción para apps: 16px, 1px, clase `.agcs-grid`. |
 | `src/palette.js` | La misma paleta en JavaScript, para gráficos. |
 | `src/series.js` | Colores de series, asignación por entidad y revisión de lo que elige el usuario. |
@@ -27,6 +31,9 @@ y reglas de UX. Donde algo de aquí choque con la marca, se corrige aquí.
 | `docs/color.md` | Las reglas de color y las decisiones del 24 de septiembre de 2026. |
 | `docs/grid.md` | Dónde va el grid en una app y las condiciones para ponerlo detrás de un gráfico. |
 | `ux-rules.md` | Reglas de UX y accesibilidad para apps. |
+| `SKILL.md` | Instrucciones para agentes: reglas duras y archivos clave. |
+| `preview/` | Tarjetas del panel del design system en Claude Design. |
+| `fonts/` | Las cinco caras que usan las apps, copiadas de agcs-design-system. |
 | `ui/` | Primitivos de marca para copiar en cada app: chevron, footer, stamp de Lab, ícono. |
 | `reference/paleta-dashboards.html` | La página con la que se decidió la paleta: dashboard de muestra, simulación de daltonismo y pruebas. Se abre en el navegador. |
 | `reference/grid-apps.html` | La página con la que se decidió el grid: los cuatro lugares, tres densidades y el gráfico alineado. |

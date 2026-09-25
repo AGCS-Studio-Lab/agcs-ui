@@ -1,0 +1,24 @@
+<!doctype html>
+<!-- @dsCard group="Color" name="Estados y texto con color" subtitle="On-track neutro · ámbar #FFB800 · rojo de fondo #E31A22 con texto blanco · rojo y azul para texto" viewport="700x230" -->
+<html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<style>
+.states { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.ts { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--rule); margin-top: 14px; }
+.ts > div { padding: 10px 12px; display: grid; gap: 3px; font-size: 11px; }
+.ts .b { background: #000; }
+.ts strong { font: 700 14px/1.2 var(--font-title); }
+</style></head>
+<body>
+  <div class="lbl">Estados · la etiqueta dice el estado</div>
+  <div class="states" style="margin-top:10px">
+    <span class="pill" style="border:1px solid var(--state-ok-edge);color:var(--state-ok-ink);padding:5px 7px">On-track</span>
+    <span class="pill" style="background:var(--state-warn-bg);color:var(--state-warn-ink)">En riesgo</span>
+    <span class="pill" style="background:var(--state-risk-bg);color:var(--state-risk-ink)">Guardrail cruzado</span>
+    <span class="note">Negro sobre ámbar 12.1:1 · blanco sobre rojo 4.7:1, APCA 76</span>
+  </div>
+  <div class="ts">
+    <div><strong style="color:#8E1116">Error</strong><span style="color:#8E1116">#8E1116 sobre blanco · 9.4:1</span><span style="color:#05699F;text-decoration:underline">Enlace #05699F · 6.0:1</span></div>
+    <div class="b"><strong style="color:#ED1C24">Error</strong><span style="color:#ED1C24">#ED1C24 sobre negro · 4.8:1</span><span style="color:#00A1F1;text-decoration:underline">Enlace #00A1F1 · 7.4:1</span></div>
+  </div>
+  <p class="note" style="margin:10px 0 0">Si un texto no es un error, un enlace o un mensaje del sistema, va en tinta.</p>
+</body></html>

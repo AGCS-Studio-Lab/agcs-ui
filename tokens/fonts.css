@@ -1,0 +1,33 @@
+/* ============================================================
+   AGCS UI -- fuentes de la marca para apps   v0.2 (2026-09-24)
+   ============================================================
+   Las mismas caras de agcs-design-system, cargadas desde fonts/.
+   Sin CDN: las redes de bancos y gobierno bloquean los hosts de
+   fuentes. La escala tipografica de pantalla sigue pendiente;
+   este archivo solo carga las caras.
+
+   N27 700 / 500     titulos
+   IBM Plex Mono     texto, datos, etiquetas (400 / 500)
+   Crimson Pro SemiBold Italic   subtitulos. Se pide por su nombre
+                     legacy a peso 400, igual que en la marca (v5.3):
+                     asi ningun convertidor sintetiza un bold falso.
+   ============================================================ */
+
+@font-face { font-family: "N27"; font-weight: 700; font-style: normal; font-display: swap;
+  src: local("N27 Bold"), local("N27-Bold"), url("../fonts/N27-Bold.otf") format("opentype"); }
+@font-face { font-family: "N27"; font-weight: 500; font-style: normal; font-display: swap;
+  src: local("N27 Medium"), local("N27-Medium"), url("../fonts/N27-Medium.otf") format("opentype"); }
+
+@font-face { font-family: "IBM Plex Mono"; font-weight: 400; font-style: normal; font-display: swap;
+  src: local("IBM Plex Mono"), local("IBMPlexMono-Regular"), url("../fonts/IBMPlexMono-Regular.ttf") format("truetype"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 500; font-style: normal; font-display: swap;
+  src: local("IBM Plex Mono Medium"), local("IBMPlexMono-Medium"), url("../fonts/IBMPlexMono-Medium.ttf") format("truetype"); }
+
+@font-face { font-family: "Crimson Pro SemiBold"; font-weight: 400; font-style: italic; font-display: swap;
+  src: local("Crimson Pro SemiBold Italic"), local("CrimsonPro-SemiBoldItalic"), url("../fonts/CrimsonPro-SemiBoldItalic.ttf") format("truetype"); }
+
+:root {
+  --font-title: "N27", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-subtitle: "Crimson Pro SemiBold", Georgia, "Times New Roman", serif;
+}
