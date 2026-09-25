@@ -4,7 +4,7 @@ La capa de interfaz de las apps de AGCS | Studio + Lab |: los tokens, las
 reglas y los primitivos de marca que usan `agcs-management-system`,
 `agcs-dris-system` y las apps que vengan.
 
-La marca vive en [`agcs-design-system`](https://github.com/maxgallard0/agcs-design-system)
+La marca vive en [`agcs-design-system`](https://github.com/AGCS-Studio-Lab/agcs-design-system)
 y manda sobre este repo. Ese repo está hecho para decks y documentos, con
 tokens a 4K y herramientas de export. Este agrega lo que una pantalla necesita
 y un deck no: grises, estados con su texto, colores de series, personalización
