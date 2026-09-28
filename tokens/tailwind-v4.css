@@ -54,7 +54,10 @@
   --color-highlight: var(--highlight);
   --color-highlight-edge: var(--highlight-edge);
 
-  /* estados: bg-warn text-warn-ink / bg-risk text-risk-ink */
+  /* estados: bg-positive text-positive-ink / bg-warn / bg-risk */
+  --color-positive:      var(--state-ok-bg);
+  --color-positive-ink:  var(--state-ok-ink);
+  --color-positive-edge: var(--state-ok-edge);
   --color-warn:      var(--state-warn-bg);
   --color-warn-ink:  var(--state-warn-ink);
   --color-risk:      var(--state-risk-bg);

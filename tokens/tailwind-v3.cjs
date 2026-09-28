@@ -30,6 +30,7 @@ module.exports = {
         rule: v("rule"),
         highlight: { DEFAULT: v("highlight"), edge: v("highlight-edge") },
 
+        positive: { DEFAULT: v("state-ok-bg"), ink: v("state-ok-ink"), edge: v("state-ok-edge") },
         warn: { DEFAULT: v("state-warn-bg"), ink: v("state-warn-ink") },
         risk: { DEFAULT: v("state-risk-bg"), ink: v("state-risk-ink") },
         "chart-risk": v("chart-risk"),

@@ -28,6 +28,7 @@ export const BLUE = {
 
 /** Decisiones del 2026-09-24. */
 export const STATES = {
+  positive: "#A7D7B5", // "On track", fondo verde funcional claro con texto negro
   amber: "#FFB800",    // "En riesgo", solo en apps; texto negro encima
   redFill: "#E31A22",  // "Guardrail cruzado" y alertas; texto blanco encima
   redText: "#8E1116",  // texto de error sobre blanco

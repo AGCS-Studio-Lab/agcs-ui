@@ -26,7 +26,7 @@ const cssHex = Object.fromEntries([...css.matchAll(/--(agcs-[a-z0-9-]+):\s*(#[0-
 const expected = {
   "agcs-obsidian": BRAND.obsidian, "agcs-paper": BRAND.paper, "agcs-lime": BRAND.lime, "agcs-carbon": BRAND.carbon,
   "agcs-mist": BRAND.mist, "agcs-data": BRAND.data, "agcs-risk": BRAND.risk,
-  "agcs-amber": STATES.amber, "agcs-red-fill": STATES.redFill, "agcs-red-text": STATES.redText, "agcs-blue-text": STATES.blueText,
+  "agcs-positive": STATES.positive, "agcs-amber": STATES.amber, "agcs-red-fill": STATES.redFill, "agcs-red-text": STATES.redText, "agcs-blue-text": STATES.blueText,
   ...Object.fromEntries(Object.entries(GRAYS).map(([k, v]) => [`agcs-gray-${k}`, v])),
   ...Object.fromEntries(Object.entries(BLUE).map(([k, v]) => [`agcs-blue-${k}`, v])),
   ...Object.fromEntries(SERIES.agcs.light.map((v, i) => [`agcs-series-${i + 1}-light`, v])),
@@ -78,6 +78,7 @@ const text = [
   ["enlace sobre blanco", STATES.blueText, BRAND.paper, 4.5],
   ["enlace sobre negro", BRAND.data, BRAND.obsidian, 4.5],
   ["texto negro sobre ambar", BRAND.obsidian, STATES.amber, 4.5],
+  ["texto negro sobre estado positivo", BRAND.obsidian, STATES.positive, 4.5],
   ["texto blanco sobre rojo de fondo", BRAND.paper, STATES.redFill, 4.5],
   ["texto negro sobre lime", BRAND.obsidian, BRAND.lime, 4.5],
   ["borde de campo sobre blanco", GRAYS[600], BRAND.paper, 3],
@@ -86,8 +87,14 @@ const text = [
 for (const [n, fg, bg, min] of text) pass(contrast(fg, bg) >= min, n, `${contrast(fg, bg).toFixed(2)}:1 (minimo ${min})`);
 const lc = apca(BRAND.paper, STATES.redFill);
 pass(lc >= 60, "texto blanco sobre rojo de fondo, APCA", `${lc.toFixed(1)} (minimo 60)`);
+const lp = Math.abs(apca(BRAND.obsidian, STATES.positive));
+pass(lp >= 60, "texto negro sobre estado positivo, APCA", `${lp.toFixed(1)} (minimo 60)`);
 const la = deltaE(BRAND.lime, STATES.amber), lac = deltaECvd(BRAND.lime, STATES.amber);
 pass(la >= 15 && lac >= 8, "lime y ambar se distinguen", `${la.toFixed(1)} normal · ${lac.toFixed(1)} daltonismo`);
+const pg = [BRAND.lime, STATES.amber, ...SERIES.agcs.light, ...SERIES.agcs.dark];
+const pd = Math.min(...pg.map((color) => deltaE(STATES.positive, color)));
+const pdc = Math.min(...pg.map((color) => deltaECvd(STATES.positive, color)));
+pass(pd >= 15 && pdc >= 8, "positivo se distingue de lime, ambar y series activas", `${pd.toFixed(1)} normal · ${pdc.toFixed(1)} daltonismo`);
 
 /* 4. Grid */
 console.log("\nGrid");

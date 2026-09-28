@@ -1,6 +1,6 @@
 # Color en las apps de AGCS
 
-Versión 0.1 · 24 de septiembre de 2026. Decidido por Max Gallardo sobre la
+Versión 0.2 · 28 de septiembre de 2026. Decidido por Max Gallardo sobre la
 página de referencia `reference/paleta-dashboards.html`, con las pruebas de
 la skill dataviz, las reglas de designparser y el contraste de WCAG 2.2 y
 APCA.
@@ -56,7 +56,7 @@ escrita dice el estado y el color la refuerza.
 
 | Estado | Fondo | Texto encima |
 |---|---|---|
-| On-track | Sin color, borde de tinta | Tinta |
+| On-track | Verde positivo `#A7D7B5`, borde de tinta | Negro, 13.0:1 |
 | En riesgo | Ámbar `#FFB800` | Negro, 12.1:1 |
 | Guardrail cruzado | Rojo de fondo `#E31A22` | Blanco, 4.7:1 · APCA 76 |
 
@@ -66,7 +66,10 @@ escrita dice el estado y el color la refuerza.
 - **Rojo de fondo.** Es el rojo de marca apenas más oscuro. Con texto blanco
   cumple WCAG 2.2 (4.7:1) y APCA (76). Sobre el rojo de marca, el texto negro
   daba 36 en APCA y el blanco 4.4:1 en WCAG.
-- Lo que va bien no lleva color, para que el ámbar y el rojo destaquen.
+- **Verde positivo.** On-track debe leerse como una señal favorable, no como
+  ausencia de estado. Usa un verde funcional propio, distinto del lime de
+  énfasis y de los siete colores de series. La etiqueta sigue siendo
+  obligatoria: el color refuerza el significado, no lo reemplaza.
 
 ## 4 · Texto con color
 

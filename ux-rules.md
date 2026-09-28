@@ -7,8 +7,8 @@ genérica choque con la marca, **manda la marca**. Este doc ya tiene esas
 adaptaciones hechas. El color de las apps está en `docs/color.md` (v0.1,
 2026-09-24) y manda sobre lo que este doc diga de color.
 
-Movido de `agcs-design-system/ux-rules.md` a este repo el 2026-09-24. La v4
-actualiza el lime (uno por grupo), los estados (ámbar y rojo de fondo) y el
+Movido de `agcs-design-system/ux-rules.md` a este repo el 2026-09-24. La v5
+actualiza el lime (uno por grupo), los estados (verde positivo, ámbar y rojo de fondo) y el
 color en gráficos.
 
 Origen: `agcs-management-system/docs/ux-rules.md` (destilado de Nielsen,

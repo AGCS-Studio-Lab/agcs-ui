@@ -51,7 +51,8 @@
   --agcs-blue-800: #02527E;
   --agcs-blue-900: #003C5D;
 
-  /* ---- Estados y texto (decisiones del 2026-09-24) ---------------- */
+  /* ---- Estados y texto (decisiones del 2026-09-24 y 2026-09-28) --- */
+  --agcs-positive:  #A7D7B5;  /* "On track": verde funcional claro, distinto del lime y de las series */
   --agcs-amber:     #FFB800;  /* "En riesgo". Reemplaza a #FFFF00 solo en apps: el amarillo se confundia con el lime */
   --agcs-red-fill:  #E31A22;  /* fondo de "Guardrail cruzado" y alertas, siempre con texto blanco */
   --agcs-red-text:  #8E1116;  /* texto de error sobre blanco */
@@ -96,8 +97,8 @@
   --chart-focus: var(--agcs-lime);
 
   /* Estados: la etiqueta escrita dice el estado, el color la refuerza */
-  --state-ok-bg:     transparent;
-  --state-ok-ink:    var(--agcs-carbon);
+  --state-ok-bg:     var(--agcs-positive);
+  --state-ok-ink:    var(--agcs-obsidian);
   --state-ok-edge:   var(--agcs-carbon);
   --state-warn-bg:   var(--agcs-amber);
   --state-warn-ink:  var(--agcs-obsidian);
@@ -141,8 +142,9 @@
   --field-edge:     var(--agcs-gray-500);
   --chart-rest:  var(--agcs-gray-600);
 
-  --state-ok-ink:  var(--agcs-paper);
-  --state-ok-edge: var(--agcs-paper);
+  --state-ok-bg:   var(--agcs-positive);
+  --state-ok-ink:  var(--agcs-obsidian);
+  --state-ok-edge: var(--agcs-positive);
 
   --text-error: var(--agcs-risk);    /* 4.8:1 sobre negro */
   --text-link:  var(--agcs-data);    /* 7.4:1 sobre negro */
