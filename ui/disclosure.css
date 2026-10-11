@@ -1,0 +1,209 @@
+/* ============================================================
+   AGCS UI -- menu y disclosure   v0.1 (2026-10-11)
+   ============================================================
+   El aspecto de ui/disclosure.jsx. Se importa una vez, despues
+   de tokens/colors.css. Es CSS plano con los roles de color:
+   funciona igual con Tailwind v3 y v4 y no depende de que
+   Tailwind escanee agcs-ui/.
+
+   Radio 0 y sombra 0. Botones y opciones de 44 px de alto. El
+   chevron queda a 16 px del borde y a 12 px del texto. Hover:
+   opacidad 0.7 en los botones, fondo invertido en las opciones.
+   Sin lime: el lime del grupo lo pone la app.
+   ============================================================ */
+
+/* ---- Boton: abre y cierra --------------------------------------- */
+.agcs-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 16px;
+  margin: 0;
+  font: inherit;
+  color: var(--ink);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  cursor: pointer;
+  transition: opacity 160ms cubic-bezier(0.2, 0, 0, 1);
+}
+.agcs-toggle:hover {
+  opacity: 0.7;
+}
+.agcs-toggle:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.agcs-toggle__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.agcs-toggle__icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  transition: transform 160ms cubic-bezier(0.2, 0, 0, 1);
+}
+/* El giro sale del aria-expanded del propio boton: funciona aunque el
+   boton viva dentro de otro elemento (el grupo del lateral de DRIs). */
+.agcs-toggle[aria-expanded="true"] > .agcs-toggle__icon {
+  transform: rotate(180deg);
+}
+
+/* Variantes */
+.agcs-toggle[data-variant="row"] {
+  width: 100%;
+  border-bottom: 1px solid var(--rule);
+}
+.agcs-toggle[data-variant="field"] {
+  width: 100%;
+  border: 1px solid var(--rule);
+}
+.agcs-toggle[data-variant="field"][aria-expanded="true"] {
+  border-color: var(--ink);
+}
+.agcs-toggle[data-variant="inline"] {
+  gap: 8px;
+  padding: 0 4px;
+}
+.agcs-toggle[data-variant="inline"] > .agcs-toggle__label {
+  flex: none;
+}
+.agcs-toggle[data-variant="icon"] {
+  justify-content: center;
+  width: 44px;
+  padding: 0;
+}
+
+/* ---- Disclosure: se abre en el flujo de la pagina ---------------- */
+.agcs-disclosure__panel {
+  padding: 16px;
+}
+.agcs-disclosure__panel[hidden] {
+  display: none;
+}
+
+/* ---- Menu anclado: enlaces y acciones de cuenta ------------------ */
+.agcs-menu {
+  position: relative;
+}
+.agcs-menu[data-anchor="parent"] {
+  position: static;
+}
+.agcs-menu__panel {
+  position: absolute;
+  z-index: 40;
+  min-width: 100%;
+  max-height: 70vh;
+  padding: 4px 0;
+  overflow-y: auto;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--ink);   /* sin sombra, el borde separa el panel de la pagina */
+  border-radius: 0;
+  box-shadow: none;
+}
+.agcs-menu__panel[hidden] {
+  display: none;
+}
+.agcs-menu[data-placement="bottom"] > .agcs-menu__panel {
+  top: calc(100% + 8px);
+}
+.agcs-menu[data-placement="top"] > .agcs-menu__panel {
+  bottom: calc(100% + 8px);
+}
+.agcs-menu[data-align="start"] > .agcs-menu__panel {
+  left: 0;
+}
+.agcs-menu[data-align="end"] > .agcs-menu__panel {
+  right: 0;
+}
+.agcs-menu[data-align="stretch"] > .agcs-menu__panel {
+  right: 0;
+  left: 0;
+}
+/* En la barra movil el panel toma todo el ancho, bajo la barra */
+.agcs-menu[data-anchor="parent"] > .agcs-menu__panel {
+  top: 100%;
+  right: 0;
+  left: 0;
+  max-height: calc(100dvh - 4rem);
+  border-width: 0 0 1px;
+}
+
+.agcs-menu__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 16px;
+  margin: 0;
+  font: inherit;
+  color: var(--ink);
+  text-align: left;
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+}
+.agcs-menu__item:hover {
+  color: var(--surface);
+  background: var(--ink);
+}
+.agcs-menu__item:focus-visible {
+  color: var(--surface);
+  background: var(--ink);
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+/* La opcion actual (aria-current) lleva una franja de tinta */
+.agcs-menu__item[aria-current]:not([aria-current="false"])::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 4px;
+  content: "";
+  background: var(--ink);
+}
+.agcs-menu__label {
+  padding: 12px 16px 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.agcs-menu__sep {
+  height: 1px;
+  margin: 4px 0;
+  background: var(--rule);
+}
+
+/* Un disclosure dentro de un menu: sus opciones van al borde del panel */
+.agcs-menu__panel .agcs-disclosure__panel {
+  padding: 0 0 4px;
+}
+.agcs-menu__panel .agcs-toggle[data-variant="row"] {
+  border-bottom-color: transparent;
+}
+
+/* ---- Movimiento reducido: el chevron cambia sin girar ------------ */
+@media (prefers-reduced-motion: reduce) {
+  .agcs-toggle,
+  .agcs-toggle__icon {
+    transition: none;
+  }
+}

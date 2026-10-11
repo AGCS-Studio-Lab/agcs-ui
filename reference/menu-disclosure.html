@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menú y disclosure</title>
+<link rel="stylesheet" href="../tokens/fonts.css">
+<link rel="stylesheet" href="../tokens/colors.css">
+<link rel="stylesheet" href="../ui/disclosure.css">
+<style>
+/* Estados fijos para mostrar hover y foco sin interacción */
+.agcs-toggle.is-hover { opacity: .7; }
+.agcs-toggle.is-focus { outline: 2px solid var(--ink); outline-offset: 2px; }
+.agcs-menu__item.is-hover, .agcs-menu__item.is-focus { color: var(--surface); background: var(--ink); }
+
+/* ---- Página del mockup ---- */
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--surface); color: var(--ink); font-family: var(--font-mono); font-size: 14px; -webkit-font-smoothing: antialiased; }
+main { max-width: 1120px; margin: 0 auto; padding: 48px 32px 96px; }
+.eyebrow { font: 500 11px/1.3 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+h1 { font: 700 40px/1.05 var(--font-title); margin: 12px 0 8px; letter-spacing: -.01em; }
+.sub { font: 400 22px/1.25 var(--font-subtitle); font-style: italic; margin: 0 0 32px; color: var(--ink-2); }
+h2 { font: 700 20px/1.2 var(--font-title); margin: 56px 0 6px; padding-top: 24px; border-top: 1px solid var(--ink); }
+h2 + p { margin-top: 0; }
+p, li { line-height: 1.55; max-width: 72ch; }
+.note { font-size: 12px; color: var(--ink-2); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px; }
+.box { border: 1px solid var(--rule); padding: 20px; }
+.box h3 { font: 500 11px/1.3 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; margin: 0 0 8px; }
+.box ul { margin: 8px 0 0; padding-left: 18px; }
+.states { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 16px; align-items: end; }
+.states.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.open-row { display: grid; grid-template-columns: 340px 1fr; gap: 32px; align-items: end; margin-top: 32px; }
+.legal { flex-wrap: wrap; }
+.frame { border: 1px solid var(--rule); padding: 16px; background: var(--surface-2); }
+.frame .side { background: var(--surface); border: 1px solid var(--rule); padding: 12px; }
+.cap { font: 500 10px/1.3 var(--font-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); margin-top: 8px; }
+.ws-name { font-family: var(--font-title); font-weight: 500; font-size: 14px; }
+.who { padding: 12px 16px; border-bottom: 1px solid var(--rule); }
+.who b { display: block; font-weight: 500; font-size: 13px; }
+.who small { display: block; margin-top: 4px; font-size: 10px; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); }
+.legal { display: flex; gap: 16px; padding: 8px 16px 6px; border-top: 1px solid var(--rule); margin-top: 4px; }
+.legal a { font-size: 11px; color: var(--text-link); text-decoration: underline; text-underline-offset: 3px; min-height: 32px; display: inline-flex; align-items: center; }
+table { border-collapse: collapse; width: 100%; margin-top: 16px; font-size: 13px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+th { font: 500 10px/1.3 var(--font-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); border-bottom-color: var(--ink); }
+td:first-child { white-space: nowrap; font-weight: 500; }
+.ask { border-left: 4px solid var(--ink); background: var(--highlight); color: var(--highlight-ink); padding: 12px 16px; margin-top: 16px; }
+.measure { position: relative; }
+.mk { position: absolute; top: -18px; font: 500 10px/1 var(--font-mono); color: var(--text-error); }
+.ruler { position: absolute; top: -6px; height: 1px; background: var(--text-error); }
+.ruler::before, .ruler::after { content: ""; position: absolute; top: -3px; width: 1px; height: 7px; background: var(--text-error); }
+.ruler::before { left: 0; } .ruler::after { right: 0; }
+.phone { width: 375px; border: 1px solid var(--ink); background: var(--surface); position: relative; height: 640px; overflow: hidden; }
+.phone .bar { display: flex; align-items: center; gap: 16px; min-height: 56px; padding: 0 16px; border-bottom: 1px solid var(--rule); }
+.phone .bar .agcs-menu { position: static; }
+.phone .agcs-menu > .agcs-menu__panel { left: 0; right: 0; top: 56px; border-width: 0 0 1px 0; max-height: calc(640px - 56px); }
+.phone .content { padding: 24px 16px; color: var(--ink-3); font-size: 12px; }
+.mobile-row { display: flex; gap: 32px; align-items: flex-start; margin-top: 16px; }
+code { font-family: var(--font-mono); font-size: 12px; background: var(--surface-2); padding: 1px 4px; }
+pre { background: var(--surface-2); border: 1px solid var(--rule); padding: 16px; font-size: 12px; line-height: 1.5; overflow-x: auto; }
+.live { border: 1px dashed var(--ink-3); padding: 24px; margin-top: 16px; display: grid; grid-template-columns: 280px 1fr; gap: 48px; align-items: end; min-height: 460px; }
+</style>
+</head>
+<body>
+<main>
+
+<div class="eyebrow">&gt;&gt; AGCS · Apps · U2.1 · Aprobada por Max el 11.10.2026</div>
+<h1>Menú y disclosure</h1>
+<p class="sub">Un solo componente para todos los toggles de las dos apps</p>
+
+<p>Alcance: design system. Es un primitivo nuevo en agcs-ui, <code>ui/disclosure.jsx</code> con su <code>ui/disclosure.css</code>, más su tarjeta en <code>preview/</code> y su documentación en README. No toca las apps: management lo copia en U2.2 y DRIs en U2.5.</p>
+
+<h2>Cuándo es menú y cuándo es disclosure</h2>
+<p>Management no permite popups ni modales para contenido (AGENTS.md, 11 de septiembre de 2026). Argus es la única excepción. La propuesta separa los dos casos por lo que llevan adentro.</p>
+<div class="grid2">
+  <div class="box">
+    <h3>Menú anclado</h3>
+    <p>Se abre sobre la pantalla, pegado a su botón, y se cierra solo. Lleva solo enlaces y acciones de cuenta.</p>
+    <ul>
+      <li>Menú de cuenta y workspace, al pie del menú lateral.</li>
+      <li>Menú de la barra en móvil.</li>
+    </ul>
+    <p class="note">Nunca lleva contenido, formularios, ayuda ni el detalle de un registro.</p>
+  </div>
+  <div class="box">
+    <h3>Disclosure en el flujo</h3>
+    <p>Se abre dentro de la página y empuja hacia abajo lo que sigue. Sirve para todo lo demás.</p>
+    <ul>
+      <li>Grupos del menú lateral.</li>
+      <li>Secciones de una página, como «Añadir persona» en Framing.</li>
+      <li>El detalle de un registro y los filtros.</li>
+      <li>Una lista dentro de un menú, como «Cambiar workspace». Hoy es un Select de shadcn, es decir, un popup dentro de otro.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Menú anclado · escritorio</h2>
+<p>Ejemplo: el menú de cuenta al pie del lateral. Abre hacia arriba y toma el ancho del botón. El contenido es de muestra; el menú de cuenta real se arma en U2.3.</p>
+<div class="states three">
+  <div>
+    <div class="frame"><div class="side">
+      <div class="agcs-menu" data-placement="top" data-state="closed">
+        <button class="agcs-toggle" data-variant="field" aria-expanded="false"><span class="agcs-toggle__label ws-name">Senda Uno</span><svg class="agcs-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+      </div>
+    </div></div>
+    <div class="cap">Cerrado</div>
+  </div>
+  <div>
+    <div class="frame"><div class="side">
+      <div class="agcs-menu" data-placement="top" data-state="closed">
+        <button class="agcs-toggle is-hover" data-variant="field" aria-expanded="false"><span class="agcs-toggle__label ws-name">Senda Uno</span><svg class="agcs-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+      </div>
+    </div></div>
+    <div class="cap">Hover · opacidad 0.7</div>
+  </div>
+  <div>
+    <div class="frame"><div class="side">
+      <div class="agcs-menu" data-placement="top" data-state="closed">
+        <button class="agcs-toggle is-focus" data-variant="field" aria-expanded="false"><span class="agcs-toggle__label ws-name">Senda Uno</span><svg class="agcs-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+      </div>
+    </div></div>
+    <div class="cap">Foco · contorno de 2 px en tinta</div>
+  </div>
+</div>
+<div class="open-row">
+  <div>
+    <div class="frame" style="padding-top:404px"><div class="side">
+      <div class="agcs-menu" data-placement="top" data-state="open">
+        <button class="agcs-toggle" data-variant="field" aria-expanded="true"><span class="agcs-toggle__label ws-name">Senda Uno</span><svg class="agcs-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="agcs-menu__panel">
+          <div class="who"><b>Vicente Rojas</b><small>Consultor</small></div>
+          <div class="agcs-disclosure" data-state="open">
+            <button class="agcs-toggle" data-variant="row" aria-expanded="true"><span class="agcs-toggle__label">Cambiar workspace</span><svg class="agcs-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+            <div class="agcs-disclosure__panel">
+              <a class="agcs-menu__item" aria-current="true" href="#">Senda Uno</a>
+              <a class="agcs-menu__item is-focus" href="#">Banco Andino</a>
+            </div>
+          </div>
+          <div class="agcs-menu__sep"></div>
+          <button class="agcs-menu__item">Ayuda</button>
+          <button class="agcs-menu__item">Ver demo</button>
+          <button class="agcs-menu__item">Cerrar sesión</button>
+          <div class="legal"><a href="#">Términos</a><a href="#">Privacidad</a><a href="#">Seguridad</a></div>
+        </div>
+      </div>
+    </div></div>
+    <div class="cap">Abierto · «Banco Andino» con foco</div>
+  </div>
+  <p class="note" style="margin:0">Abierto, el botón y el panel llevan borde de tinta: sin sombra, el borde es lo que separa el panel de la página. La opción con foco o hover se invierte a tinta. El workspace actual lleva una franja de tinta a la izquierda. El componente no usa lime: el lime del lateral sigue siendo el ítem activo de la navegación.</p>
+</div>
+
+<h2>Disclosure en el flujo</h2>
+<p>Ejemplo: «Añadir persona» en Framing. Hoy usa <code>justify-between</code> sin margen, y el chevron toca la esquina.</p>
+<div class="states three">
+  <div>
+    <div class="frame" style="background:var(--surface)">
+      <div class="agcs-disclosure" data-state="closed">
+        <button class="agcs-toggle" data-variant="row" aria-expanded="false"><span class="agcs-toggle__label">Añadir persona <span style="color:var(--ink-3)">· opcional</span></span><svg class="agcs-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+      </div>
+    </div>
+    <div class="cap">Cerrado</div>
+  </div>
+  <div>
+    <div class="frame" style="background:var(--surface)">
+      <div class="agcs-disclosure" data-state="closed">
+        <button class="agcs-toggle is-focus" data-variant="row" aria-expanded="false"><span class="agcs-toggle__label">Añadir persona <span style="color:var(--ink-3)">· opcional</span></span><svg class="agcs-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+      </div>
+    </div>
+    <div class="cap">Foco</div>
+  </div>
+  <div>
+    <div class="frame" style="background:var(--surface)">
+      <div class="agcs-disclosure" data-state="open">
+        <button class="agcs-toggle" data-variant="row" aria-expanded="true"><span class="agcs-toggle__label">Añadir persona <span style="color:var(--ink-3)">· opcional</span></span><svg class="agcs-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="agcs-disclosure__panel" style="border-bottom:1px solid var(--rule)">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:12px">
+            <div><b style="font-weight:500">Nombre</b><div style="height:44px;border:1px solid var(--field-edge);margin-top:6px"></div></div>
+            <div><b style="font-weight:500">Correo</b><div style="height:44px;border:1px solid var(--field-edge);margin-top:6px"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cap">Abierto · empuja lo que sigue</div>
+  </div>
+</div>
+
+<h2>El chevron con margen</h2>
+<p>Los dos recuadros marcan el borde de la sección.</p>
+<div class="grid2">
+  <div>
+    <div class="measure" style="border:1px solid var(--ink);margin-top:28px">
+      <div style="display:flex;justify-content:space-between;align-items:center;min-height:48px">
+        <span>Añadir persona</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <span class="mk" style="right:0">0 px</span>
+    </div>
+    <div class="cap">Hoy · justify-between sin margen: el chevron toca la esquina</div>
+  </div>
+  <div>
+    <div class="measure" style="border:1px solid var(--ink);margin-top:28px">
+      <div class="agcs-disclosure" data-state="closed">
+        <button class="agcs-toggle" data-variant="row" aria-expanded="false" style="border-bottom-color:transparent"><span class="agcs-toggle__label">Añadir persona</span><svg class="agcs-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+      </div>
+      <span class="ruler" style="right:0;width:16px;top:auto;bottom:14px"></span>
+      <span class="mk" style="right:0">16 px</span>
+    </div>
+    <div class="cap">Propuesta · 16 px al borde, 12 px al texto, 44 px de alto</div>
+  </div>
+</div>
+<p class="note">El chevron es un ícono funcional dibujado como el <code>chevron-down</code> de Lucide, a 1.5 px y en tinta, dentro del componente: no depende de la versión de Lucide de cada app. El <code>&gt;&gt;</code> de la marca no se usa como indicador.</p>
+
+<h2>Móvil · 375 px</h2>
+<div class="mobile-row">
+  <div>
+    <div class="phone">
+      <div class="bar">
+        <span class="eyebrow" style="color:var(--ink)">AGCS</span>
+        <span style="flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Senda Uno</span>
+        <div class="agcs-menu" data-placement="bottom" data-state="open">
+          <button class="agcs-toggle" data-variant="inline" aria-expanded="true" style="font-family:var(--font-subtitle);font-style:italic;font-size:16px"><span class="agcs-toggle__label">Menú</span><svg class="agcs-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+          <div class="agcs-menu__panel">
+            <div class="agcs-menu__label">Forward System</div>
+            <a class="agcs-menu__item" href="#">Monitor</a>
+            <a class="agcs-menu__item" href="#" aria-current="true">Forward Framing</a>
+            <a class="agcs-menu__item" href="#">Strategic Intent</a>
+            <a class="agcs-menu__item" href="#">Foresights Engine</a>
+            <a class="agcs-menu__item" href="#">Explore Portfolio</a>
+            <div class="agcs-menu__sep"></div>
+            <div class="agcs-disclosure" data-state="open">
+              <button class="agcs-toggle" data-variant="row" aria-expanded="true"><span class="agcs-toggle__label">Cuenta y espacio de trabajo</span><svg class="agcs-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+              <div class="agcs-disclosure__panel">
+                <div class="who" style="border:0;padding-top:4px"><b>Vicente Rojas</b><small>Consultor</small></div>
+                <button class="agcs-menu__item">Ayuda</button>
+                <button class="agcs-menu__item">Cerrar sesión</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="content">Contenido de la página</div>
+    </div>
+    <div class="cap">Abierto · todo el ancho, debajo de la barra</div>
+  </div>
+  <div style="max-width:420px">
+    <p>En móvil el menú toma todo el ancho bajo la barra y hace scroll si no cabe. Cada opción mide 44 px de alto.</p>
+    <p>«Cuenta y espacio de trabajo» es un disclosure dentro del menú, como hoy en management.</p>
+    <p>El botón «Menú» lleva el chevron a 12 px del texto: es la variante en línea, sin el ancho completo.</p>
+    <p class="note">Variantes del botón: <code>row</code> (ancho completo con línea abajo), <code>field</code> (con borde, para el menú de cuenta), <code>inline</code> (texto y chevron) e <code>icon</code> (solo el chevron, 44 × 44, con <code>aria-label</code>, para los grupos del lateral de DRIs, donde el título es un enlace).</p>
+  </div>
+</div>
+
+<h2>Comportamiento</h2>
+<table>
+  <thead><tr><th></th><th>Menú anclado</th><th>Disclosure</th></tr></thead>
+  <tbody>
+    <tr><td>Abre</td><td>Clic, Enter o Espacio en el botón.</td><td>Igual.</td></tr>
+    <tr><td>Cierra</td><td>El botón, clic afuera, Escape, elegir una opción o salir con Tab.</td><td>Solo el botón.</td></tr>
+    <tr><td>Foco</td><td>Con Escape o al elegir, el foco vuelve al botón. Contorno de 2 px en tinta en el botón; la opción con foco se invierte a tinta.</td><td>Se queda en el botón. Mismo contorno.</td></tr>
+    <tr><td>Accesibilidad</td><td><code>aria-expanded</code> y <code>aria-controls</code> en el botón. Patrón de menú de navegación con disclosure de WAI-ARIA: se recorre con Tab.</td><td><code>aria-expanded</code> y <code>aria-controls</code>. El panel cerrado queda oculto con <code>hidden</code>.</td></tr>
+    <tr><td>Tamaño</td><td>Botón y opciones de 44 px de alto.</td><td>Botón de 44 px de alto.</td></tr>
+    <tr><td>Forma</td><td>Radio 0 y sombra 0. Panel con borde de tinta.</td><td>Radio 0 y sombra 0. Línea fina abajo.</td></tr>
+    <tr><td>Movimiento</td><td colspan="2">El chevron gira 180° en 160 ms con <code>cubic-bezier(0.2, 0, 0, 1)</code>. El panel aparece y desaparece sin animación. Con <code>prefers-reduced-motion</code>, el chevron cambia sin girar.</td></tr>
+  </tbody>
+</table>
+<div class="ask"><b>Decidido:</b> el disclosure no se cierra con clic afuera ni con Escape, porque es contenido de la página y cerrarlo solo haría perder lo que la persona estaba leyendo o escribiendo. El criterio «cierra con clic afuera y con Escape» es del menú anclado.</div>
+
+<h2>Pruébalo</h2>
+<p class="note">Este bloque funciona: abre el menú, haz clic afuera, usa Escape y Tab.</p>
+<div class="live">
+  <div class="side" style="border:1px solid var(--rule);padding:12px">
+    <div class="agcs-menu" data-placement="top" data-state="closed" id="live-menu">
+      <button class="agcs-toggle" data-variant="field" aria-expanded="false" aria-controls="live-menu-panel" id="live-menu-btn"><span class="agcs-toggle__label ws-name">Senda Uno</span><svg class="agcs-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+      <div class="agcs-menu__panel" id="live-menu-panel" hidden>
+        <div class="who"><b>Vicente Rojas</b><small>Consultor</small></div>
+        <button class="agcs-menu__item" data-close>Ayuda</button>
+        <button class="agcs-menu__item" data-close>Ver demo</button>
+        <button class="agcs-menu__item" data-close>Cerrar sesión</button>
+        <div class="legal"><a href="#" data-close>Términos</a><a href="#" data-close>Privacidad</a><a href="#" data-close>Seguridad</a></div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="agcs-disclosure" data-state="closed" id="live-disc">
+      <button class="agcs-toggle" data-variant="row" aria-expanded="false" aria-controls="live-disc-panel" id="live-disc-btn" style="border-top:1px solid var(--rule)"><span class="agcs-toggle__label">Añadir persona <span style="color:var(--ink-3)">· opcional</span></span><svg class="agcs-toggle__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+      <div class="agcs-disclosure__panel" id="live-disc-panel" hidden><p style="margin:0" class="note">Aquí van los campos. Escape y el clic afuera no cierran este bloque.</p></div>
+    </div>
+  </div>
+</div>
+
+<h2>Cómo llega a las apps</h2>
+<ul>
+  <li><code>ui/disclosure.jsx</code>: React sin dependencias, con tipos en JSDoc. Sirve en React 18 (DRIs) y 19 (management). Management lo lee como TypeScript con <code>allowJs</code>; DRIs pasa <code>checkJs</code>.</li>
+  <li><code>ui/disclosure.css</code>: CSS plano con los roles de <code>tokens/colors.css</code>. Funciona igual con Tailwind v3 y v4, y no depende de que Tailwind escanee <code>agcs-ui/</code> (DRIs no lo escanea) ni de <code>.agcs-label</code> o <code>.agcs-chevron</code>, que agcs-ui todavía no define.</li>
+</ul>
+<pre>import { Disclosure, DisclosureTrigger, DisclosurePanel,
+         Menu, MenuTrigger, MenuPanel, MenuItem } from "@/agcs-ui/ui/disclosure";
+
+&lt;Menu placement="top"&gt;
+  &lt;MenuTrigger variant="field"&gt;{workspaceName}&lt;/MenuTrigger&gt;
+  &lt;MenuPanel aria-label="Cuenta"&gt;
+    &lt;MenuItem as={Link} href="/legal/terminos"&gt;Términos&lt;/MenuItem&gt;
+    &lt;MenuItem onSelect={signOut}&gt;Cerrar sesión&lt;/MenuItem&gt;
+  &lt;/MenuPanel&gt;
+&lt;/Menu&gt;
+
+&lt;Disclosure&gt;
+  &lt;DisclosureTrigger&gt;Añadir persona&lt;/DisclosureTrigger&gt;
+  &lt;DisclosurePanel&gt;…&lt;/DisclosurePanel&gt;
+&lt;/Disclosure&gt;</pre>
+
+</main>
+<script>
+(function () {
+  var menu = document.getElementById("live-menu");
+  var btn = document.getElementById("live-menu-btn");
+  var panel = document.getElementById("live-menu-panel");
+  function setMenu(open, focusBack) {
+    menu.dataset.state = open ? "open" : "closed";
+    btn.setAttribute("aria-expanded", String(open));
+    panel.hidden = !open;
+    if (!open && focusBack) btn.focus();
+  }
+  btn.addEventListener("click", function () { setMenu(menu.dataset.state !== "open"); });
+  document.addEventListener("pointerdown", function (e) { if (menu.dataset.state === "open" && !menu.contains(e.target)) setMenu(false); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && menu.dataset.state === "open") setMenu(false, menu.contains(document.activeElement) || document.activeElement === document.body); });
+  menu.addEventListener("focusout", function (e) { if (e.relatedTarget && !menu.contains(e.relatedTarget)) setMenu(false); });
+  panel.addEventListener("click", function (e) { var t = e.target.closest("[data-close]"); if (t) { e.preventDefault(); setMenu(false, true); } });
+
+  var disc = document.getElementById("live-disc");
+  var dbtn = document.getElementById("live-disc-btn");
+  var dpanel = document.getElementById("live-disc-panel");
+  dbtn.addEventListener("click", function () {
+    var open = disc.dataset.state !== "open";
+    disc.dataset.state = open ? "open" : "closed";
+    dbtn.setAttribute("aria-expanded", String(open));
+    dpanel.hidden = !open;
+  });
+})();
+</script>
+</body>
+</html>

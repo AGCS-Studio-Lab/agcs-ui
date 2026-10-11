@@ -1,0 +1,63 @@
+<!doctype html>
+<!-- @dsCard group="Componentes" name="Menú y disclosure" subtitle="Un toggle para las dos apps · menú anclado solo para cuenta y navegación · disclosure en el flujo para todo lo demás" viewport="700x540" -->
+<html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"><link rel="stylesheet" href="../ui/disclosure.css">
+<style>
+.cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; align-items: end; margin-top: 10px; }
+.cols.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.box { border: 1px solid var(--rule); padding: 8px; font-size: 12px; }
+.box.tall { padding-top: 196px; }
+.cap { font: 500 9.5px/1.3 var(--font-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); margin-top: 5px; }
+.ws { font-family: var(--font-title); font-weight: 500; font-size: 13px; }
+.agcs-menu__item { font-size: 12px; }
+.focus { outline: 2px solid var(--ink); outline-offset: 2px; }
+.hover { color: var(--surface); background: var(--ink); }
+.muted { color: var(--ink-3); }
+</style></head>
+<body>
+  <div class="lbl">Menú anclado · cuenta y workspace, menú móvil</div>
+  <div class="cols">
+    <div>
+      <div class="box tall"><div class="agcs-menu" data-state="closed" data-placement="top" data-align="stretch" data-anchor="self">
+        <button type="button" class="agcs-toggle" data-variant="field" aria-expanded="false"><span class="agcs-toggle__label ws">Senda Uno</span><svg class="agcs-toggle__icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+      </div></div>
+      <div class="cap">Cerrado</div>
+    </div>
+    <div>
+      <div class="box tall"><div class="agcs-menu" data-state="closed" data-placement="top" data-align="stretch" data-anchor="self">
+        <button type="button" class="agcs-toggle focus" data-variant="field" aria-expanded="false"><span class="agcs-toggle__label ws">Senda Uno</span><svg class="agcs-toggle__icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+      </div></div>
+      <div class="cap">Con foco · 2 px en tinta</div>
+    </div>
+    <div>
+      <div class="box tall"><div class="agcs-menu" data-state="open" data-placement="top" data-align="stretch" data-anchor="self">
+        <button type="button" class="agcs-toggle" data-variant="field" aria-expanded="true"><span class="agcs-toggle__label ws">Senda Uno</span><svg class="agcs-toggle__icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="agcs-menu__panel" aria-label="Cuenta">
+          <div class="agcs-menu__label">Cambiar workspace</div>
+          <button type="button" class="agcs-menu__item" aria-current="true">Senda Uno</button>
+          <button type="button" class="agcs-menu__item hover">Banco Andino</button>
+          <div role="separator" class="agcs-menu__sep"></div>
+          <button type="button" class="agcs-menu__item">Cerrar sesión</button>
+        </div>
+      </div></div>
+      <div class="cap">Abierto · hover invertido</div>
+    </div>
+  </div>
+
+  <div class="lbl" style="margin-top:16px">Disclosure · en el flujo de la página, solo su botón lo cierra</div>
+  <div class="cols two">
+    <div>
+      <div class="box"><div class="agcs-disclosure" data-state="closed">
+        <button type="button" class="agcs-toggle" data-variant="row" aria-expanded="false"><span class="agcs-toggle__label">Añadir persona <span class="muted">· opcional</span></span><svg class="agcs-toggle__icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+      </div></div>
+      <div class="cap">Cerrado · chevron a 16 px del borde</div>
+    </div>
+    <div>
+      <div class="box"><div class="agcs-disclosure" data-state="open">
+        <button type="button" class="agcs-toggle" data-variant="row" aria-expanded="true"><span class="agcs-toggle__label">Añadir persona <span class="muted">· opcional</span></span><svg class="agcs-toggle__icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="square" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+        <div class="agcs-disclosure__panel muted">Empuja hacia abajo lo que sigue.</div>
+      </div></div>
+      <div class="cap">Abierto</div>
+    </div>
+  </div>
+  <p class="note" style="margin:10px 0 0">Radio 0, sombra 0, 44 px de alto. Sin lime: el lime del grupo lo pone la app. <code>ui/disclosure.jsx</code> con <code>ui/disclosure.css</code>.</p>
+</body></html>
