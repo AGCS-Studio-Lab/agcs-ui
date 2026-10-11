@@ -71,6 +71,7 @@ La marca prohíbe sombra y radio: la jerarquía se construye **solo con espacio,
 ## 6. Interacción y craft
 
 - **Sigue convenciones** (Ley de Jakob): nav, acciones y selectores donde se esperan.
+- **Toggles**: todos salen de `ui/disclosure.jsx`. Menú anclado solo para enlaces y acciones de cuenta (cuenta y workspace, menú móvil): se cierra con clic afuera, Escape, Tab o al elegir. Todo lo demás es un disclosure en el flujo de la página, que solo cierra su botón. Chevron a 16 px del borde, 44 px de alto. Detalle en `README.md`.
 - **Todos los estados** de cada control: default / hover / focus / active / disabled / loading. Hover de marca = **opacidad 0.7** (`.agcs-hover`) o inversión de fondo — nunca tinte, nunca elevación (`hover:shadow-*` prohibido).
 - **Microinteracciones** cortas (~160-300ms), solo si comunican. Sin decoración.
 - **Sin dark patterns**.
