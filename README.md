@@ -29,6 +29,7 @@ y reglas de UX. Donde algo de aquí choque con la marca, se corrige aquí.
 | `src/color-math.js` | Distancia entre colores, simulación de daltonismo, contraste WCAG y APCA. |
 | `tools/check-palette.mjs` | Prueba toda la paleta. Ningún color cambia sin pasarla. |
 | `tests/` | Pruebas del menú y el disclosure con React 18 y 19 (`npm test`). |
+| `.github/workflows/pruebas.yml` | Corre `npm test` y `npm run check` en cada PR a `main` y en cada push a `main`. |
 | `docs/color.md` | Las reglas de color y las decisiones del 24 de septiembre de 2026. |
 | `docs/grid.md` | Dónde va el grid en una app y las condiciones para ponerlo detrás de un gráfico. |
 | `ux-rules.md` | Reglas de UX y accesibilidad para apps. |
