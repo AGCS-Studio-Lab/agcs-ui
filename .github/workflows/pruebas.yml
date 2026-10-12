@@ -1,0 +1,39 @@
+# Corre las pruebas del repo en cada PR a main y en cada push a main:
+# el menú y el disclosure con React 19 y 18 (npm test) y la paleta (npm run check).
+name: Pruebas
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pruebas-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pruebas:
+    name: npm test y check-palette
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # La misma versión de Node que en local.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26.10.0
+
+      - run: npm ci
+
+      - name: Menú y disclosure con React 19 y 18
+        run: npm test
+
+      - name: Paleta
+        run: npm run check
