@@ -72,7 +72,8 @@ La marca prohíbe sombra y radio: la jerarquía se construye **solo con espacio,
 
 - **Sigue convenciones** (Ley de Jakob): nav, acciones y selectores donde se esperan.
 - **Toggles**: todos salen de `ui/disclosure.jsx`. Menú anclado solo para enlaces y acciones de cuenta (cuenta y workspace, menú móvil): se cierra con clic afuera, Escape, Tab o al elegir. Todo lo demás es un disclosure en el flujo de la página, que solo cierra su botón. Chevron a 16 px del borde, 44 px de alto. Detalle en `README.md`.
-- **Todos los estados** de cada control: default / hover / focus / active / disabled / loading. Hover de marca = **opacidad 0.7** (`.agcs-hover`) o inversión de fondo — nunca tinte, nunca elevación (`hover:shadow-*` prohibido).
+- **Enlaces**: en tinta y siempre subrayados, con la clase `agcs-link` de `ui/link.css`. En hover y foco, banda lime detrás del texto con texto negro en modo claro, y texto lime en modo oscuro. Nunca azules. Un botón que se ve como enlace usa la misma clase. Detalle en `docs/color.md` §4.
+- **Todos los estados** de cada control: default / hover / focus / active / disabled / loading. Hover de marca = **opacidad 0.7** (`.agcs-hover`) o inversión de fondo — nunca tinte, nunca elevación (`hover:shadow-*` prohibido). Los enlaces de texto usan el lime de `ui/link.css`.
 - **Microinteracciones** cortas (~160-300ms), solo si comunican. Sin decoración.
 - **Sin dark patterns**.
 - **Voz**: declarativa, conclusión primero, tercera persona, sentence case; ALL CAPS solo en labels mono cortos. Sin emoji en UI.
