@@ -1,6 +1,7 @@
 # Color en las apps de AGCS
 
-Versión 0.2 · 28 de septiembre de 2026. Decidido por Max Gallardo sobre la
+Versión 0.3 · 15 de octubre de 2026: los enlaces pasan a tinta (§4).
+La paleta la decidió Max Gallardo el 28 de septiembre de 2026 sobre la
 página de referencia `reference/paleta-dashboards.html`, con las pruebas de
 la skill dataviz, las reglas de designparser y el contraste de WCAG 2.2 y
 APCA.
@@ -73,15 +74,39 @@ escrita dice el estado y el color la refuerza.
 
 ## 4 · Texto con color
 
-Si un texto no es un error, un enlace o un mensaje del sistema, va en tinta.
+Si un texto no es un error o un mensaje del sistema, va en tinta. Los
+enlaces también van en tinta: ver «Enlaces», abajo.
 
 | Color | Cuándo se usa |
 |---|---|
 | Rojo oscuro `#8E1116` | Texto sobre blanco: el error de un campo, el aviso de que algo no cargó, el nombre de una acción que borra o cierra, una variación que es mala. |
 | Rojo de marca `#ED1C24` | Una barra o un punto de gráfico cuando el dato es un riesgo. Texto de error sobre negro. |
 | Rojo de fondo `#E31A22` | Fondo de "Guardrail cruzado" y de las alertas, siempre con texto blanco. |
-| Azul oscuro `#05699F` | Texto sobre blanco: enlaces, siempre subrayados, y mensajes del sistema. |
-| Azul de marca `#00A1F1` | Serie 1 de los gráficos y escala de los mapas de calor. Enlaces y mensajes del sistema sobre negro. |
+| Azul oscuro `#05699F` | Texto sobre blanco: mensajes del sistema. Nunca un enlace. |
+| Azul de marca `#00A1F1` | Serie 1 de los gráficos y escala de los mapas de calor. Mensajes del sistema sobre negro. |
+
+### Enlaces
+
+Decidido por Max el 15 de octubre de 2026 sobre `reference/links.html`
+(D14, U7.3 del plan del 15.10). Hasta esa fecha los enlaces eran azules.
+
+- **En reposo, tinta y subrayado.** Como el enlace tiene el color del texto,
+  el subrayado es lo que lo distingue (WCAG 1.4.1) y nunca se quita.
+- **Hover y foco en modo claro:** una banda lime detrás de la línea del
+  texto, con el texto en negro (17.8:1). La banda pinta la línea, no toda la
+  caja: un enlace de 44 px de alto no se vuelve un bloque. El lime como texto
+  sobre blanco da 1.2:1, por eso va de fondo.
+- **Hover y foco en modo oscuro:** el texto y el subrayado pasan a lime, sin
+  banda (17.8:1 sobre negro, 14.7:1 sobre Carbon).
+- **Foco:** el mismo cambio más el outline de 2 px en tinta.
+- **Un botón que se ve como enlace** (Reintentar, Cancelar, Deshacer) usa el
+  mismo estilo.
+
+Lo hace la clase `agcs-link` de `ui/link.css`, con los roles `--text-link`,
+`--link-hover-bg` y `--link-hover-ink`. Cumple la regla del lime: en reposo
+ningún enlace es lime, así que no hay lime repetido por fila, y el hover
+pinta un solo enlace a la vez. En claro lleva su marca negra: el texto y el
+subrayado.
 
 ## 5 · Gráficos
 
