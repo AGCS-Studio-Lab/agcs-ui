@@ -157,7 +157,7 @@
   /* Sobre negro el lime se lee como texto: sin banda, texto lime */
   --text-link:      var(--agcs-paper);
   --link-hover-bg:  transparent;
-  --link-hover-ink: var(--agcs-lime);  /* 17.6:1 sobre negro */
+  --link-hover-ink: var(--agcs-lime);  /* 17.8:1 sobre negro */
 
   --series-1: var(--agcs-series-1-dark);
   --series-2: var(--agcs-series-2-dark);

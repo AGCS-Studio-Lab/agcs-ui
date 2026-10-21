@@ -78,6 +78,12 @@ describe("ui/link.css", () => {
     assert.match(block(css, ".agcs-link:focus-visible"), /outline-offset:\s*2px/);
   });
 
+  it("leaves typography and spacing to the app", () => {
+    // Una regla de tipografia o de padding aqui gana sobre las utilidades de
+    // Tailwind de las apps (en v4 por capas, en v3 por especificidad).
+    assert.doesNotMatch(css, /(^|[\s{;])(font|font-size|font-weight|font-family|line-height|padding|margin|text-align)\s*:/m);
+  });
+
   it("never rounds, shadows or fades on hover", () => {
     assert.doesNotMatch(css, /border-radius|box-shadow|transition/);
     assert.doesNotMatch(block(css, ".agcs-link:hover"), /opacity/);

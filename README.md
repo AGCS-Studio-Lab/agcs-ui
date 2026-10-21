@@ -200,7 +200,9 @@ después de los tokens:
 
 La clase `agcs-link` va en el `<a>`, en el `Link` de Next o de react-router, o
 en un botón que se ve como enlace. Reemplaza a `text-link underline` y a
-`hover:opacity-70`: no se combina con ellos.
+`hover:opacity-70`: no se combina con ellos ni con utilidades de color. El
+tamaño, el peso y el espaciado sí van con las utilidades de la app: `link.css`
+no los toca.
 
 ```jsx
 <Link href="/login" className="agcs-link">Iniciar sesión</Link>
@@ -210,6 +212,9 @@ en un botón que se ve como enlace. Reemplaza a `text-link underline` y a
 
 - La banda pinta la línea del texto, no la caja: un enlace de 44 px de alto
   no se vuelve un bloque, y un enlace que corta línea lleva una banda por línea.
+  Eso vale para un enlace en línea o `inline-flex`. En un elemento de bloque o
+  `flex` la banda cruza todo su ancho: el diseño de bloque va en un contenedor
+  y el enlace adentro.
 - El hover solo aparece con mouse o trackpad (`hover: hover`); en pantallas
   táctiles no se queda pegado después del toque.
 - El rol `--text-link` (la clase `text-link` de los presets de Tailwind) ya es

@@ -6,13 +6,17 @@
    plan del 15.10):
      - modo claro: banda lime detras del texto, texto en tinta.
        El lime como color de texto no se lee sobre blanco (1.2:1).
-     - modo oscuro: el texto y el subrayado pasan a lime (17.6:1).
+     - modo oscuro: el texto y el subrayado pasan a lime (17.8:1).
    El foco suma el outline de 2 px de las apps.
 
    CSS plano con los roles de tokens/colors.css: no depende de
    Tailwind. Cada app lo copia sin editarlo y usa la clase
    `agcs-link` en <a>, en el Link de su router o en un boton que
-   se ve como enlace.
+   se ve como enlace, en linea o inline-flex.
+
+   No toca la tipografia ni el espaciado: el tamano, el peso y el
+   padding vienen de la app. Los botones ya llegan sin fondo, borde
+   ni padding por el preflight de Tailwind de cada app.
    ============================================================ */
 
 .agcs-link {
@@ -33,14 +37,6 @@
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
   cursor: pointer;
-}
-
-/* Un boton que se ve como enlace (Reintentar, Cancelar) */
-button.agcs-link {
-  font: inherit;
-  border: 0;
-  padding: 0;
-  text-align: inherit;
 }
 
 /* Hover solo con puntero fino: en pantallas tactiles el hover se
