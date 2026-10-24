@@ -1,0 +1,67 @@
+/* ============================================================
+   AGCS UI -- enlaces de texto   v0.1 (2026-10-15)
+   ============================================================
+   Un enlace va en tinta y subrayado. Al pasar el mouse o al
+   recibir el foco usa el lime de AGCS, sin transicion (D14 del
+   plan del 15.10):
+     - modo claro: banda lime detras del texto, texto en tinta.
+       El lime como color de texto no se lee sobre blanco (1.2:1).
+     - modo oscuro: el texto y el subrayado pasan a lime (17.8:1).
+   El foco suma el outline de 2 px de las apps.
+
+   CSS plano con los roles de tokens/colors.css: no depende de
+   Tailwind. Cada app lo copia sin editarlo y usa la clase
+   `agcs-link` en <a>, en el Link de su router o en un boton que
+   se ve como enlace, en linea o inline-flex.
+
+   No toca la tipografia ni el espaciado: el tamano, el peso y el
+   padding vienen de la app. Los botones ya llegan sin fondo, borde
+   ni padding por el preflight de Tailwind de cada app.
+   ============================================================ */
+
+.agcs-link {
+  color: var(--text-link);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  /* La banda va detras de la linea de texto, no de toda la caja:
+     un enlace de 44 px de alto no pinta un bloque de 44 px. En un
+     enlace que corta linea, cada linea lleva su banda. 1.3em es
+     el respaldo para navegadores sin la unidad lh. */
+  background-image: linear-gradient(var(--link-hover-bg), var(--link-hover-bg));
+  background-repeat: no-repeat;
+  background-position: 0 50%;
+  background-size: 0 1.3em;
+  background-size: 0 1lh;
+  background-color: transparent;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  cursor: pointer;
+}
+
+/* Hover solo con puntero fino: en pantallas tactiles el hover se
+   queda pegado despues del toque. */
+@media (hover: hover) and (pointer: fine) {
+  .agcs-link:hover {
+    color: var(--link-hover-ink);
+    background-size: 100% 1.3em;
+    background-size: 100% 1lh;
+  }
+}
+
+.agcs-link:focus-visible {
+  color: var(--link-hover-ink);
+  background-size: 100% 1.3em;
+  background-size: 100% 1lh;
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.agcs-link:disabled,
+.agcs-link[aria-disabled="true"] {
+  cursor: default;
+  opacity: 0.4;
+  color: var(--text-link);
+  background-size: 0 1.3em;
+  background-size: 0 1lh;
+}

@@ -1,12 +1,13 @@
 <!doctype html>
-<!-- @dsCard group="Color" name="Estados y texto con color" subtitle="On-track verde #A7D7B5 · ámbar #FFB800 · rojo de fondo #E31A22 con texto blanco · rojo y azul para texto" viewport="700x230" -->
-<html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css">
+<!-- @dsCard group="Color" name="Estados y texto con color" subtitle="On-track verde #A7D7B5 · ámbar #FFB800 · rojo de fondo #E31A22 con texto blanco · rojo y azul para texto · enlaces en tinta" viewport="700x270" -->
+<html lang="es"><head><meta charset="utf-8"><link rel="stylesheet" href="_card.css"><link rel="stylesheet" href="../ui/link.css">
 <style>
 .states { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 .ts { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--rule); margin-top: 14px; }
 .ts > div { padding: 10px 12px; display: grid; gap: 3px; font-size: 11px; }
-.ts .b { background: #000; }
+.ts .b { background: #000; color: var(--ink); }
 .ts strong { font: 700 14px/1.2 var(--font-title); }
+.ts .on { color: var(--link-hover-ink); background-size: 100% 1lh; }
 </style></head>
 <body>
   <div class="lbl">Estados · la etiqueta dice el estado</div>
@@ -17,8 +18,8 @@
     <span class="note">Negro sobre verde 13.0:1 · negro sobre ámbar 12.1:1 · blanco sobre rojo 4.7:1, APCA 76</span>
   </div>
   <div class="ts">
-    <div><strong style="color:#8E1116">Error</strong><span style="color:#8E1116">#8E1116 sobre blanco · 9.4:1</span><span style="color:#05699F;text-decoration:underline">Enlace #05699F · 6.0:1</span></div>
-    <div class="b"><strong style="color:#ED1C24">Error</strong><span style="color:#ED1C24">#ED1C24 sobre negro · 4.8:1</span><span style="color:#00A1F1;text-decoration:underline">Enlace #00A1F1 · 7.4:1</span></div>
+    <div><strong style="color:#8E1116">Error</strong><span style="color:#8E1116">#8E1116 sobre blanco · 9.4:1</span><span style="color:#05699F">Sistema #05699F · 6.0:1</span><span><a class="agcs-link" href="#">Enlace en tinta</a> · <a class="agcs-link on" href="#">en hover</a></span></div>
+    <div class="b" data-mode="dark"><strong style="color:#ED1C24">Error</strong><span style="color:#ED1C24">#ED1C24 sobre negro · 4.8:1</span><span style="color:#00A1F1">Sistema #00A1F1 · 7.4:1</span><span><a class="agcs-link" href="#">Enlace</a> · <a class="agcs-link on" href="#">en hover</a></span></div>
   </div>
-  <p class="note" style="margin:10px 0 0">Si un texto no es un error, un enlace o un mensaje del sistema, va en tinta.</p>
+  <p class="note" style="margin:10px 0 0">Si un texto no es un error o un mensaje del sistema, va en tinta. Los enlaces también: subrayados, con el lime en hover.</p>
 </body></html>

@@ -32,7 +32,7 @@ export const STATES = {
   amber: "#FFB800",    // "En riesgo", solo en apps; texto negro encima
   redFill: "#E31A22",  // "Guardrail cruzado" y alertas; texto blanco encima
   redText: "#8E1116",  // texto de error sobre blanco
-  blueText: "#05699F", // enlaces y mensajes del sistema sobre blanco
+  blueText: "#05699F", // mensajes del sistema sobre blanco
 };
 
 export const SURFACES = { light: BRAND.paper, dark: BRAND.obsidian };

@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enlaces</title>
+<link rel="stylesheet" href="../tokens/fonts.css">
+<link rel="stylesheet" href="../tokens/colors.css">
+<link rel="stylesheet" href="../ui/link.css">
+<style>
+/* Estados fijos para mostrar hover y foco sin interaccion: copian ui/link.css */
+.agcs-link.is-hover, .agcs-link.is-focus { color: var(--link-hover-ink); background-size: 100% 1lh; }
+.agcs-link.is-focus { outline: 2px solid var(--ink); outline-offset: 2px; }
+/* Variante B, solo para comparar: bloque en toda la caja */
+.agcs-link.is-block { color: var(--link-hover-ink); background: var(--link-hover-bg); }
+
+/* ---- Pagina del mockup ---- */
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--surface); color: var(--ink); font-family: var(--font-mono); font-size: 14px; -webkit-font-smoothing: antialiased; }
+main { max-width: 1120px; margin: 0 auto; padding: 48px 32px 96px; }
+.eyebrow { font: 500 11px/1.3 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+h1 { font: 700 40px/1.05 var(--font-title); margin: 12px 0 8px; letter-spacing: -.01em; }
+.sub { font: 400 22px/1.25 var(--font-subtitle); font-style: italic; margin: 0 0 32px; color: var(--ink-2); }
+h2 { font: 700 20px/1.2 var(--font-title); margin: 56px 0 6px; padding-top: 24px; border-top: 1px solid var(--ink); }
+h2 + p { margin-top: 0; }
+p, li { line-height: 1.55; max-width: 76ch; }
+.note { font-size: 12px; color: var(--ink-2); }
+code { font-family: var(--font-mono); font-size: 12px; background: var(--surface-2); padding: 1px 4px; }
+.cap { font: 500 10px/1.3 var(--font-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); margin-top: 8px; }
+.shots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+.shots img { display: block; width: 100%; border: 1px solid var(--rule); }
+.full { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.full img { display: block; width: 100%; border: 1px solid var(--rule); }
+
+/* Matriz de estados: una fila por contexto, una columna por estado */
+.matrix { display: grid; grid-template-columns: 150px repeat(3, minmax(0, 1fr)); margin-top: 16px; border-top: 1px solid var(--rule); }
+.matrix > div { padding: 16px; border-bottom: 1px solid var(--rule); }
+.matrix .h { font: 500 10px/1.3 var(--font-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); padding-top: 10px; padding-bottom: 10px; border-bottom-color: var(--ink); }
+.matrix .ctx { font-size: 12px; color: var(--ink-2); }
+.dark-panel { background: var(--surface); color: var(--ink); padding: 24px; margin-top: 16px; }
+.dark-panel .matrix { border-top-color: var(--rule); }
+.dark-panel .matrix .h { border-bottom-color: var(--ink); }
+.dark-panel h3 { font: 500 11px/1.3 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; margin: 0; color: var(--ink-2); }
+
+.auth { display: flex; flex-wrap: wrap; gap: 0 24px; font-size: 12px; }
+.auth .agcs-link { display: inline-flex; align-items: center; min-height: 44px; }
+.para { font-size: 13px; line-height: 1.6; margin: 0; max-width: 34ch; }
+.err { font-size: 11px; color: var(--text-error); margin: 0; }
+.err .agcs-link { min-height: 44px; font: inherit; border: 0; padding: 0; } /* la página no tiene el preflight de las apps */
+
+.vs { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px; }
+.vs .box { border: 1px solid var(--rule); padding: 20px; }
+.vs .box h3 { font: 500 11px/1.3 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; margin: 0 0 8px; }
+.pick { border-left: 4px solid var(--ink); }
+
+table { border-collapse: collapse; width: 100%; margin-top: 16px; font-size: 13px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--rule); }
+th { font: 500 10px/1.3 var(--font-mono); letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); border-bottom-color: var(--ink); }
+td.n { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ask { border-left: 4px solid var(--ink); background: var(--highlight); color: var(--highlight-ink); padding: 12px 16px; margin-top: 16px; }
+.ask p { margin: 4px 0; }
+</style>
+</head>
+<body>
+<main>
+
+<div class="eyebrow">&gt;&gt; AGCS · Apps · U7.3 del plan del 15.10 · Aprobada por Max el 15.10.2026</div>
+<h1>Enlaces</h1>
+<p class="sub">En tinta, con el lime de AGCS en hover y foco</p>
+
+<p>Alcance: design system, después las dos apps. El estilo nace en agcs-ui como <code>ui/link.css</code> (clase <code>agcs-link</code>) y tres roles en <code>tokens/colors.css</code>. Management y DRIs copian los dos archivos y cambian sus enlaces a la clase, como se hizo con el menú y el disclosure.</p>
+
+<h2>Hoy</h2>
+<p>Los enlaces salen azules de un solo lugar: el rol <code>--text-link</code> de agcs-ui, que la clase <code>text-link</code> usa 42 veces en management y 8 en DRIs (una de ellas es <code>AUTH_LINK</code>, que usan las cuatro páginas de acceso). Sobre blanco es <code>#05699F</code>; sobre negro, <code>#00A1F1</code>. En hover, management no cambia nada y DRIs baja la opacidad a 0.7.</p>
+<div class="full">
+  <div><img src="../docs/capturas/links/antes/management-login.png" alt="Login de management con dos enlaces azules"><div class="cap">Management · /login</div></div>
+  <div><img src="../docs/capturas/links/antes/dris-sign-in.png" alt="Inicio de sesión de DRIs con dos enlaces azules"><div class="cap">DRIs · /sign-in</div></div>
+</div>
+<div class="shots">
+  <div><img src="../docs/capturas/links/antes/dris-sign-in-links-reposo.png" alt=""><div class="cap">DRIs · reposo</div></div>
+  <div><img src="../docs/capturas/links/antes/dris-sign-in-links-hover.png" alt=""><div class="cap">DRIs · hover (opacidad 0.7)</div></div>
+  <div><img src="../docs/capturas/links/antes/dris-sign-in-links-foco.png" alt=""><div class="cap">DRIs · foco</div></div>
+</div>
+
+<h2>Propuesta · modo claro</h2>
+<p>En reposo, tinta y subrayado: el subrayado es lo que distingue al enlace del texto, así que nunca se quita. En hover, una banda lime detrás de la línea del texto, con el texto en tinta, como el número seleccionado de la evaluación (D2 del plan del 10.10). El foco es el mismo hover más el outline de 2 px de las apps.</p>
+<div class="matrix">
+  <div class="h">Contexto</div><div class="h">Reposo</div><div class="h">Hover</div><div class="h">Foco con teclado</div>
+
+  <div class="ctx">Enlace suelto, 44 px de alto (inicio de sesión)</div>
+  <div><div class="auth"><a class="agcs-link" href="#">Olvidé mi contraseña</a><a class="agcs-link" href="#">Crear cuenta</a></div></div>
+  <div><div class="auth"><a class="agcs-link is-hover" href="#">Olvidé mi contraseña</a><a class="agcs-link" href="#">Crear cuenta</a></div></div>
+  <div><div class="auth"><a class="agcs-link is-focus" href="#">Olvidé mi contraseña</a><a class="agcs-link" href="#">Crear cuenta</a></div></div>
+
+  <div class="ctx">Dentro de un párrafo, en dos líneas (respuesta de Argus)</div>
+  <div><p class="para">Según el <a class="agcs-link" href="#">informe de consumo 2026 de la Cámara de Comercio</a>, la demanda crece en tiendas de cercanía.</p></div>
+  <div><p class="para">Según el <a class="agcs-link is-hover" href="#">informe de consumo 2026 de la Cámara de Comercio</a>, la demanda crece en tiendas de cercanía.</p></div>
+  <div><p class="para">Según el <a class="agcs-link is-focus" href="#">informe de consumo 2026 de la Cámara de Comercio</a>, la demanda crece en tiendas de cercanía.</p></div>
+
+  <div class="ctx">En un aviso de error (botón que se ve como enlace)</div>
+  <div><p class="err">No se pudo cargar tu preferencia. <button type="button" class="agcs-link">Reintentar</button></p></div>
+  <div><p class="err">No se pudo cargar tu preferencia. <button type="button" class="agcs-link is-hover">Reintentar</button></p></div>
+  <div><p class="err">No se pudo cargar tu preferencia. <button type="button" class="agcs-link is-focus">Reintentar</button></p></div>
+</div>
+
+<h2>Propuesta · modo oscuro</h2>
+<p>Las dos apps usan el modo oscuro en paneles (<code>data-mode="dark"</code>): el panel de bienvenida del registro, «Siguiente paso» en el inicio, el encabezado de Pulse. Sobre negro el lime se lee como texto, así que no lleva banda: el texto y el subrayado pasan a lime.</p>
+<div class="dark-panel" data-mode="dark">
+  <h3>Panel oscuro</h3>
+  <div class="matrix">
+    <div class="h">Contexto</div><div class="h">Reposo</div><div class="h">Hover</div><div class="h">Foco con teclado</div>
+
+    <div class="ctx">Enlace suelto, 44 px</div>
+    <div><div class="auth"><a class="agcs-link" href="#">Ver 3 más en Incubation Labs</a></div></div>
+    <div><div class="auth"><a class="agcs-link is-hover" href="#">Ver 3 más en Incubation Labs</a></div></div>
+    <div><div class="auth"><a class="agcs-link is-focus" href="#">Ver 3 más en Incubation Labs</a></div></div>
+
+    <div class="ctx">Dentro de un párrafo</div>
+    <div><p class="para">Revisa el <a class="agcs-link" href="#">informe de consumo 2026 de la Cámara de Comercio</a> antes de decidir.</p></div>
+    <div><p class="para">Revisa el <a class="agcs-link is-hover" href="#">informe de consumo 2026 de la Cámara de Comercio</a> antes de decidir.</p></div>
+    <div><p class="para">Revisa el <a class="agcs-link is-focus" href="#">informe de consumo 2026 de la Cámara de Comercio</a> antes de decidir.</p></div>
+  </div>
+</div>
+
+<h2>Banda o bloque</h2>
+<p>Muchos enlaces tienen 44 px de alto para el dedo. Si el lime pinta toda la caja, el hover es un bloque de 44 px; la banda pinta solo la línea del texto. Propongo la banda.</p>
+<div class="vs">
+  <div class="box pick">
+    <h3>A · Banda detrás del texto (propuesta)</h3>
+    <div class="auth"><a class="agcs-link is-hover" href="#">Olvidé mi contraseña</a><a class="agcs-link" href="#">Crear cuenta</a></div>
+    <p class="note">Mismo tamaño en un enlace suelto y en uno dentro de un párrafo. En un enlace de dos líneas, cada línea lleva su banda.</p>
+  </div>
+  <div class="box">
+    <h3>B · Bloque en toda la caja</h3>
+    <div class="auth"><a class="agcs-link is-block" href="#">Olvidé mi contraseña</a><a class="agcs-link" href="#">Crear cuenta</a></div>
+    <p class="note">Se parece más a un botón que a un enlace, y el bloque cambia de alto según dónde esté el enlace.</p>
+  </div>
+</div>
+
+<h2>Contraste</h2>
+<table>
+  <thead><tr><th>Estado</th><th>Texto sobre fondo</th><th>WCAG</th><th>APCA</th></tr></thead>
+  <tbody>
+    <tr><td>Reposo, claro</td><td>Tinta <code>#1A1A1A</code> sobre blanco</td><td class="n">17.4:1</td><td class="n">104</td></tr>
+    <tr><td>Hover y foco, claro</td><td>Negro sobre lime <code>#C8FF29</code></td><td class="n">17.8:1</td><td class="n">95</td></tr>
+    <tr><td>Reposo, oscuro</td><td>Blanco sobre negro</td><td class="n">21.0:1</td><td class="n">108</td></tr>
+    <tr><td>Hover y foco, oscuro</td><td>Lime sobre negro · sobre carbón <code>#1A1A1A</code></td><td class="n">17.8:1 · 14.7:1</td><td class="n">96 · 94</td></tr>
+    <tr><td>Outline de foco</td><td>Tinta sobre blanco · blanco sobre negro</td><td class="n">17.4:1 · 21.0:1</td><td class="n">—</td></tr>
+    <tr><td>Por qué no lime como texto en claro</td><td>Lime sobre blanco</td><td class="n">1.2:1</td><td class="n">8</td></tr>
+  </tbody>
+</table>
+<p class="note">Todo pasa AA (4.5:1 para texto, 3:1 para el outline). Como el enlace en reposo tiene el color del texto, el subrayado es la señal que no depende del color (WCAG 1.4.1).</p>
+
+<h2>Regla del lime</h2>
+<p>CLAUDE.md de las dos apps: «uno por grupo, tres por pantalla, siempre con una marca negra; nada que se repita por fila o tarjeta va en lime».</p>
+<ul>
+  <li><strong>En reposo ningún enlace es lime.</strong> Una tabla o una lista con un enlace por fila sigue en tinta: no hay lime repetido por fila.</li>
+  <li><strong>El lime aparece en un solo enlace a la vez</strong>, el que está bajo el mouse o con el foco, y se va al salir. No suma un lime fijo a ningún grupo.</li>
+  <li><strong>En claro lleva su marca negra:</strong> texto y subrayado en negro sobre la banda. En oscuro el lime va solo, como <code>--highlight-edge</code> en ese modo.</li>
+  <li>El hover no usa <code>opacity: 0.7</code> ni inversión, las dos formas de hover de la regla 8 de agcs-ui. Es una tercera forma, solo para enlaces de texto: la regla 8 se actualiza en <code>SKILL.md</code>.</li>
+</ul>
+
+<h2>Qué cambia en cada repo</h2>
+<table>
+  <thead><tr><th>Repo</th><th>Cambio</th></tr></thead>
+  <tbody>
+    <tr><td>agcs-ui</td><td><code>ui/link.css</code> nuevo. En <code>tokens/colors.css</code>, <code>--text-link</code> pasa a tinta y se suman <code>--link-hover-bg</code> y <code>--link-hover-ink</code>. Pruebas de contraste en <code>check-palette</code>, prueba del CSS, <code>docs/color.md</code>, <code>SKILL.md</code>, README y la tarjeta de estados.</td></tr>
+    <tr><td>management</td><td>Copia de los dos archivos. Los 42 usos de <code>text-link</code>, en 32 archivos, pasan a <code>agcs-link</code>, más la variante <code>link</code> del botón de shadcn.</td></tr>
+    <tr><td>DRIs</td><td>Copia de los dos archivos. Los 8 usos de <code>text-link</code>, en 6 archivos (con <code>AUTH_LINK</code> de las páginas de acceso), y la variante <code>link</code> del botón, que usa la alerta de insights.</td></tr>
+  </tbody>
+</table>
+<p class="note">Tres enlaces de management están en archivos de PRs abiertos de la auditoría U5.1: <code>foresights/page.tsx</code> y <code>present-forward-workspace.tsx</code> (#292) y <code>clients-manager.tsx</code> (#296). Con el cambio del token dejan de ser azules sin tocar esos archivos; la clase <code>agcs-link</code>, con el hover lime, entra cuando esos PRs estén en <code>dev</code>. Los mensajes del sistema (<code>text-info</code>) siguen en azul: no son enlaces.</p>
+
+<div class="ask">
+  <p><strong>Decidido por Max (15.10.2026):</strong></p>
+  <p>1. Banda (A).</p>
+  <p>2. Las acciones de texto subrayadas que ya estaban en tinta (Cancelar, Deshacer, Quitar, Saltar tutorial) llevan el mismo estilo: se ven igual que un enlace.</p>
+</div>
+
+</main>
+</body>
+</html>

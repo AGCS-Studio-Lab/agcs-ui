@@ -1,5 +1,5 @@
 /* ============================================================
-   AGCS UI -- tokens de color para apps   v0.1 (2026-09-24)
+   AGCS UI -- tokens de color para apps   v0.5 (2026-10-15)
    ============================================================
    La marca vive en agcs-design-system y manda. Este archivo
    agrega lo que una app necesita y un deck no: grises, estados
@@ -22,7 +22,7 @@
   --agcs-lime:     #C8FF29;
   --agcs-carbon:   #1A1A1A;
   --agcs-mist:     #E5E5E5;
-  --agcs-data:     #00A1F1;   /* azul de marca: serie 1, mapas de calor, enlaces sobre negro */
+  --agcs-data:     #00A1F1;   /* azul de marca: serie 1, mapas de calor, mensajes del sistema sobre negro */
   --agcs-risk:     #ED1C24;   /* rojo de marca: datos de riesgo en graficos, texto de error sobre negro */
 
   /* ---- Grises: diez pasos parejos en OKLCH ------------------------ */
@@ -56,7 +56,7 @@
   --agcs-amber:     #FFB800;  /* "En riesgo". Reemplaza a #FFFF00 solo en apps: el amarillo se confundia con el lime */
   --agcs-red-fill:  #E31A22;  /* fondo de "Guardrail cruzado" y alertas, siempre con texto blanco */
   --agcs-red-text:  #8E1116;  /* texto de error sobre blanco */
-  --agcs-blue-text: #05699F;  /* enlaces y mensajes del sistema sobre blanco */
+  --agcs-blue-text: #05699F;  /* mensajes del sistema sobre blanco */
 
   /* ---- Series, tema AGCS: siete colores en orden fijo ------------- */
   --agcs-series-1-light: #00A1F1;  --agcs-series-1-dark: #0495DE;  /* azul datos */
@@ -105,10 +105,15 @@
   --state-risk-bg:   var(--agcs-red-fill);
   --state-risk-ink:  var(--agcs-paper);
 
-  /* Texto con color: solo errores, enlaces y mensajes del sistema */
+  /* Texto con color: solo errores y mensajes del sistema */
   --text-error: var(--agcs-red-text);
-  --text-link:  var(--agcs-blue-text);
   --text-info:  var(--agcs-blue-text);
+
+  /* Enlaces (D14, 15.10.2026): en tinta y subrayados, nunca azules.
+     En hover y foco, banda lime con texto en tinta (ui/link.css). */
+  --text-link:      var(--agcs-carbon);
+  --link-hover-bg:  var(--agcs-lime);
+  --link-hover-ink: var(--agcs-obsidian);
 
   /* Marcas de grafico que SON riesgo */
   --chart-risk: var(--agcs-risk);
@@ -147,8 +152,12 @@
   --state-ok-edge: var(--agcs-positive);
 
   --text-error: var(--agcs-risk);    /* 4.8:1 sobre negro */
-  --text-link:  var(--agcs-data);    /* 7.4:1 sobre negro */
-  --text-info:  var(--agcs-data);
+  --text-info:  var(--agcs-data);    /* 7.4:1 sobre negro */
+
+  /* Sobre negro el lime se lee como texto: sin banda, texto lime */
+  --text-link:      var(--agcs-paper);
+  --link-hover-bg:  transparent;
+  --link-hover-ink: var(--agcs-lime);  /* 17.8:1 sobre negro */
 
   --series-1: var(--agcs-series-1-dark);
   --series-2: var(--agcs-series-2-dark);

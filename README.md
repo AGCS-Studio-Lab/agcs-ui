@@ -28,7 +28,7 @@ y reglas de UX. Donde algo de aquí choque con la marca, se corrige aquí.
 | `src/grid-chart.js` | Geometría de un gráfico de barras alineado con el grid. |
 | `src/color-math.js` | Distancia entre colores, simulación de daltonismo, contraste WCAG y APCA. |
 | `tools/check-palette.mjs` | Prueba toda la paleta. Ningún color cambia sin pasarla. |
-| `tests/` | Pruebas del menú y el disclosure con React 18 y 19 (`npm test`). |
+| `tests/` | Pruebas del menú y el disclosure con React 18 y 19, y de las reglas de `ui/disclosure.css` y `ui/link.css` (`npm test`). |
 | `.github/workflows/pruebas.yml` | Corre `npm test` y `npm run check` en cada PR a `main` y en cada push a `main`. |
 | `docs/color.md` | Las reglas de color y las decisiones del 24 de septiembre de 2026. |
 | `docs/grid.md` | Dónde va el grid en una app y las condiciones para ponerlo detrás de un gráfico. |
@@ -36,11 +36,12 @@ y reglas de UX. Donde algo de aquí choque con la marca, se corrige aquí.
 | `SKILL.md` | Instrucciones para agentes: reglas duras y archivos clave. |
 | `preview/` | Tarjetas del panel del design system en Claude Design. |
 | `fonts/` | Las cinco caras que usan las apps, copiadas de agcs-design-system. |
-| `ui/` | Primitivos de marca para copiar en cada app: chevron, footer, stamp de Lab, ícono, y el menú y disclosure (`disclosure.jsx` con `disclosure.css`). |
+| `ui/` | Primitivos de marca para copiar en cada app: chevron, footer, stamp de Lab, ícono, el menú y disclosure (`disclosure.jsx` con `disclosure.css`) y los enlaces (`link.css`). |
 | `reference/paleta-dashboards.html` | La página con la que se decidió la paleta: dashboard de muestra, simulación de daltonismo y pruebas. Se abre en el navegador. |
 | `reference/grid-apps.html` | La página con la que se decidió el grid: los cuatro lugares, tres densidades y el gráfico alineado. |
 | `reference/menu-disclosure.html` | La página con la que se decidió el menú y el disclosure: cuándo es cada uno, sus estados y el móvil. |
-| `docs/capturas/` | Capturas del menú y el disclosure con React 19 y 18. |
+| `reference/links.html` | La página con la que se decidieron los enlaces en tinta: cómo eran, sus estados en claro y oscuro, el contraste y la regla del lime. |
+| `docs/capturas/` | Capturas del menú y el disclosure con React 19 y 18, y de los enlaces antes del cambio (`links/antes/`). |
 
 ## Cómo se usa
 
@@ -182,6 +183,44 @@ Las pruebas corren cada caso con React 19 y con React 18, y revisan las reglas
 duras en el CSS: radio 0, sombra 0, 44 px, colores por rol y movimiento
 reducido.
 
+## Enlaces
+
+Un enlace va en tinta y siempre subrayado. En hover y con el foco usa el lime
+de AGCS: en modo claro, una banda lime detrás de la línea del texto con el
+texto en negro; en modo oscuro, el texto y el subrayado en lime. El foco suma
+el outline de 2 px. Nunca es azul. Las reglas y el contraste están en
+`docs/color.md` §4.
+
+Cada app copia `ui/link.css` sin editarlo y lo importa en el CSS global,
+después de los tokens:
+
+```css
+@import "../agcs-ui/ui/link.css";
+```
+
+La clase `agcs-link` va en el `<a>`, en el `Link` de Next o de react-router, o
+en un botón que se ve como enlace. Reemplaza a `text-link underline` y a
+`hover:opacity-70`: no se combina con ellos ni con utilidades de color. El
+tamaño, el peso y el espaciado sí van con las utilidades de la app: `link.css`
+no los toca.
+
+```jsx
+<Link href="/login" className="agcs-link">Iniciar sesión</Link>
+<a className="agcs-link inline-flex min-h-11 items-center" href={url}>Abrir fuente</a>
+<button type="button" className="agcs-link min-h-11" onClick={retry}>Reintentar</button>
+```
+
+- La banda pinta la línea del texto, no la caja: un enlace de 44 px de alto
+  no se vuelve un bloque, y un enlace que corta línea lleva una banda por línea.
+  Eso vale para un enlace en línea o `inline-flex`. En un elemento de bloque o
+  `flex` la banda cruza todo su ancho: el diseño de bloque va en un contenedor
+  y el enlace adentro.
+- El hover solo aparece con mouse o trackpad (`hover: hover`); en pantallas
+  táctiles no se queda pegado después del toque.
+- El rol `--text-link` (la clase `text-link` de los presets de Tailwind) ya es
+  tinta, así que un enlace que todavía no usa `agcs-link` no sale azul, pero
+  tampoco tiene el hover lime.
+
 ## Antes de cambiar un color
 
 ```bash
@@ -200,5 +239,8 @@ Revisa también el grid. Si algo falla, el cambio no entra.
   barras que lo usan como escala. En una app el dato no se redondea.
 - **v0.4 (11 oct 2026):** menú y disclosure en `ui/disclosure.jsx`, el
   toggle común de management y DRIS (U2.1 del plan del 10 de octubre).
+- **v0.5 (15 oct 2026):** enlaces en tinta con el lime en hover y foco,
+  `ui/link.css` (U7.3 del plan del 15 de octubre). `--text-link` deja de ser
+  azul.
 - **Pendiente:** tipografía de pantalla, espaciado, el resto de los componentes
   y pantallas base.
