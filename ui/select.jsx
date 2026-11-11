@@ -189,7 +189,7 @@ export const Select = forwardRef(
             aria-activedescendant={expanded && activeRow !== undefined ? optionId(activeRow) : undefined}
             placeholder={expanded && !freeText && !query ? (selected?.label ?? placeholder) : placeholder}
             value={expanded ? query : label}
-            onClick={(event) => { onClick?.(event); if (!event.defaultPrevented) toggle(); }}
+            onClick={(event) => { onClick?.(event); if (!event.defaultPrevented && !expanded) toggle(); }}
             onChange={(event) => {
               setQuery(event.target.value); setEdited(true); setActive(0); changeOpen(true);
               if (freeText) commit(event.target.value, null);

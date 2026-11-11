@@ -40,6 +40,29 @@ for (const version of REACT_VERSIONS) {
       view.act(() => view.$("svg").dispatchEvent(new window.MouseEvent("click", { bubbles: true })));
       assert.deepEqual(calls, [true, false]); view.unmount();
     });
+    it("keeps the query, filtered options and active row when clicking the open input", () => {
+      const view = render({ defaultValue: "c", options: [
+        { value: "a", label: "Beta" }, { value: "b", label: "Berenjena" }, options[2],
+      ] });
+      const input = view.$('[role="combobox"]');
+      const labels = () => Array.from(view.container.querySelectorAll('[role="option"]'), (option) => option.textContent);
+      try {
+        view.act(() => input.click());
+        type(view, "be");
+        view.act(() => keyDown(input, "ArrowDown"));
+        const active = input.getAttribute("aria-activedescendant");
+        assert.deepEqual(labels(), ["Beta", "Berenjena"]);
+        input.setSelectionRange(1, 1);
+        view.act(() => input.click());
+        assert.equal(input.getAttribute("aria-expanded"), "true");
+        assert.equal(input.value, "be");
+        assert.deepEqual(labels(), ["Beta", "Berenjena"]);
+        assert.equal(input.getAttribute("aria-activedescendant"), active);
+        assert.equal(input.selectionStart, 1);
+        view.act(() => view.$(".agcs-select__chevron").click());
+        assert.equal(input.getAttribute("aria-expanded"), "false");
+      } finally { view.unmount(); }
+    });
     it("shows the selected label as the open search placeholder without changing the list label", () => {
       for (const defaultValue of ["c", ""]) {
         const view = render({ defaultValue, placeholder: "Elige un área", "aria-label": undefined });
