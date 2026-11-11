@@ -51,10 +51,11 @@ export const Select = forwardRef(
     const expanded = open && !disabled;
     // El texto libre se conserva al abrir, pero solo filtra tras una edición.
     const term = fold(freeText && !edited ? "" : query);
-    const rows = [
+    const allRows = [
       ...(emptyLabel ? [{ value: "", label: emptyLabel }] : []),
       ...options,
-    ].filter((option) => fold(`${option.label} ${option.hint ?? ""}`).includes(term));
+    ];
+    const rows = allRows.filter((option) => fold(`${option.label} ${option.hint ?? ""}`).includes(term));
     const canCreate = Boolean(onCreate && term && !options.some((option) => fold(option.label) === term));
     const enabled = rows.map((option, index) => option.disabled ? -1 : index).filter((index) => index !== -1);
     if (canCreate) enabled.push(rows.length);
@@ -75,7 +76,10 @@ export const Select = forwardRef(
     function openList(initialActive = 0) {
       setQuery(freeText ? label : "");
       setEdited(false);
-      setActive(initialActive);
+      // Al abrir se muestran todas las filas; conserva la elección si está habilitada.
+      const selectedActive = allRows.filter((option) => !option.disabled)
+        .findIndex((option) => String(option.value) === selectedValue);
+      setActive(selectedActive === -1 ? initialActive : selectedActive);
       changeOpen(true);
     }
     /** @param {string} next @param {SelectOption | null} option */

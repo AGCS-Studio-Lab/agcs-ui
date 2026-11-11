@@ -40,6 +40,71 @@ for (const version of REACT_VERSIONS) {
       view.act(() => view.$("svg").dispatchEvent(new window.MouseEvent("click", { bubbles: true })));
       assert.deepEqual(calls, [true, false]); view.unmount();
     });
+    it("opens on the current enabled choice and Enter preserves its value", () => {
+      const choices = [...options, { value: "d", label: "Delta" }];
+      for (const freeText of [false, true]) {
+        const calls = [];
+        const view = render({ options: choices, name: "area", defaultValue: "c", freeText,
+          onChange: (...args) => calls.push(args) });
+        const input = view.$('[role="combobox"]');
+        const selected = view.$('[aria-selected="true"]');
+        const scrolled = [];
+        selected.scrollIntoView = (settings) => scrolled.push(settings);
+        try {
+          for (const open of [() => input.click(), () => keyDown(input, "ArrowDown"),
+            () => keyDown(input, "ArrowUp"), () => view.$(".agcs-select__chevron").click(),
+            () => view.$(".agcs-select__field").click()]) {
+            view.act(open);
+            assert.equal(input.getAttribute("aria-activedescendant"), selected.id);
+            assert.equal(input.value, freeText ? "Café" : "");
+            assert.equal(view.container.querySelectorAll('[role="option"]').length, choices.length);
+            assert.deepEqual(scrolled.at(-1), { block: "nearest" });
+            view.act(() => keyDown(input, "Enter"));
+            assert.equal(input.value, "Café");
+            assert.equal(view.$('[type="hidden"]').value, "c");
+          }
+          assert.equal(scrolled.length, 5);
+          assert.deepEqual(calls, Array.from({ length: 5 }, () => ["c", choices[2]]));
+        } finally { view.unmount(); }
+      }
+    });
+    it("opens past emptyLabel on the current choice and Enter does not clear it", () => {
+      const calls = [];
+      const view = render({ name: "area", defaultValue: "c", emptyLabel: "Sin área",
+        onChange: (...args) => calls.push(args) });
+      const input = view.$('[role="combobox"]');
+      try {
+        view.act(() => keyDown(input, "ArrowDown"));
+        assert.equal(input.getAttribute("aria-activedescendant"), view.$('[aria-selected="true"]').id);
+        view.act(() => keyDown(input, "Enter"));
+        assert.deepEqual(calls, [["c", options[2]]]);
+        assert.equal(input.value, "Café");
+        assert.equal(view.$('[type="hidden"]').value, "c");
+      } finally { view.unmount(); }
+    });
+    it("keeps first/last enabled opening fallbacks when there is no enabled match", () => {
+      for (const defaultValue of ["", "missing", "b"]) {
+        const view = render({ defaultValue });
+        const input = view.$('[role="combobox"]');
+        const rows = view.container.querySelectorAll('[role="option"]');
+        try {
+          for (const [open, expected] of [[() => input.click(), rows[0]],
+            [() => keyDown(input, "ArrowDown"), rows[0]], [() => keyDown(input, "ArrowUp"), rows[2]]]) {
+            view.act(open);
+            assert.equal(input.getAttribute("aria-activedescendant"), expected.id);
+            view.act(() => keyDown(input, "Escape"));
+          }
+        } finally { view.unmount(); }
+      }
+    });
+    it("treats emptyLabel as the current choice for an empty value", () => {
+      const view = render({ emptyLabel: "Sin área" });
+      const input = view.$('[role="combobox"]');
+      try {
+        view.act(() => keyDown(input, "ArrowUp"));
+        assert.equal(input.getAttribute("aria-activedescendant"), view.$('[aria-selected="true"]').id);
+      } finally { view.unmount(); }
+    });
     it("keeps the query, filtered options and active row when clicking the open input", () => {
       const view = render({ defaultValue: "c", options: [
         { value: "a", label: "Beta" }, { value: "b", label: "Berenjena" }, options[2],
@@ -150,6 +215,7 @@ for (const version of REACT_VERSIONS) {
       view.act(() => keyDown(input, "ArrowUp")); assert.equal(active().textContent, "ÁrbolMéxico");
       view.act(() => keyDown(input, "Enter")); assert.deepEqual(calls, [["a", options[0]]]);
       assert.equal(input.value, "Árbol"); assert.equal(document.activeElement, input);
+      view.act(() => keyDown(input, "ArrowUp")); assert.equal(active().textContent, "ÁrbolMéxico");
       view.act(() => keyDown(input, "ArrowUp")); assert.equal(active().textContent, "Café"); view.unmount();
     });
     it("Escape, Tab, blur and outside pointerdown restore the selection without changing it", () => {
@@ -218,6 +284,7 @@ for (const version of REACT_VERSIONS) {
         { options, name: "area", defaultValue: "a", emptyLabel: "Sin área", onChange: (...args) => calls.push(args) })));
       assert.equal(new window.FormData(view.$("form")).get("area"), "a");
       view.act(() => keyDown(view.$('[role="combobox"]'), "ArrowDown"));
+      view.act(() => keyDown(view.$('[role="combobox"]'), "Home"));
       view.act(() => keyDown(view.$('[role="combobox"]'), "Enter"));
       assert.deepEqual(calls, [["", null]]);
       assert.equal(new window.FormData(view.$("form")).get("area"), ""); view.unmount();
@@ -226,6 +293,7 @@ for (const version of REACT_VERSIONS) {
       const calls = [];
       const view = render({ value: "c", onChange: (...args) => calls.push(args) });
       view.act(() => keyDown(view.$("input"), "ArrowDown"));
+      view.act(() => keyDown(view.$("input"), "Home"));
       view.act(() => keyDown(view.$("input"), "Enter"));
       assert.equal(view.$("input").value, "Café"); assert.equal(calls[0][0], "a"); view.unmount();
       function Controlled() {
