@@ -21,7 +21,7 @@ Read `README.md`, then `docs/color.md`, `docs/grid.md` and `ux-rules.md`. This s
 7. **The construction grid** (`.agcs-grid`, 16px, 1px) goes on four places only: module entry headers, empty states, diagram canvases, and bar charts where the grid **is** the scale (`alignedBars()` in `src/grid-chart.js`). Tables, text, forms and other charts are flat. **Data is never rounded** to land on a line.
 8. **Zero radius, zero shadow.** Hierarchy from space, ground inversion and hairlines. Hover is opacity 0.7 or ground inversion; text links use the lime of `ui/link.css` instead.
 9. **Icons:** the AGCS library for concepts; Lucide at 1.5px in ink for functional icons the library does not draw (Max, 2026-09-09). No emoji anywhere.
-10. **Every toggle comes from `ui/disclosure.jsx`** (with `ui/disclosure.css`); apps build none of their own. `Menu` (anchored, closes on outside click, Escape, Tab out or choosing an item) is only for links and account actions: the account and workspace menu and the mobile bar menu. Everything else is a `Disclosure` that opens in the page flow and closes only on its button, including a list inside a menu. Never a popup or modal for content (management AGENTS.md).
+10. **Every toggle and every select comes from agcs-ui**: `Disclosure` and `Menu` in `ui/disclosure.jsx` + `ui/disclosure.css`, and `Select` in `ui/select.jsx` + `ui/select.css`; apps build none of their own. `Menu` (anchored, closes on outside click, Escape, Tab out or choosing an item) is only for links and account actions: the account and workspace menu and the mobile bar menu. The `Select` list is the only other anchored popup because it is part of a field; use it for every choice field, with search, optional creation or free text. Everything else is a `Disclosure` that opens in the page flow and closes only on its button, including a list inside a menu. Never a popup or modal for content (management AGENTS.md). Run the vendored `tools/check-toggles.mjs` in each app's CI; every allow entry needs a reason and must still match a finding.
 
 ## Key files
 
@@ -29,7 +29,7 @@ Read `README.md`, then `docs/color.md`, `docs/grid.md` and `ux-rules.md`. This s
 - `src/palette.js`, `src/series.js`, `src/grid-chart.js`, `src/color-math.js`
 - `tools/check-palette.mjs` -- the tests every change passes
 - `docs/color.md`, `docs/grid.md`, `ux-rules.md`
-- `ui/` -- brand primitives apps copy into `src/components/brand/`; `ui/disclosure.jsx` + `ui/disclosure.css` is the menu and disclosure, and `ui/link.css` the text links, copied as is
-- `tests/` -- `npm test` runs the menu and disclosure with React 18 and 19, and checks the rules of `ui/disclosure.css` and `ui/link.css`
+- `ui/` -- brand primitives apps copy into `src/components/brand/`; `ui/disclosure.jsx` + `ui/disclosure.css` is the menu and disclosure, `ui/select.jsx` + `ui/select.css` the choice field, and `ui/link.css` the text links, copied as is
+- `tests/` -- `npm test` runs Menu, Disclosure and Select with React 18 and 19, and checks the rules of `ui/disclosure.css`, `ui/select.css` and `ui/link.css`, plus the toggle checker
 - `preview/` -- the Design System cards
 - `reference/paleta-dashboards.html`, `reference/grid-apps.html`, `reference/menu-disclosure.html`, `reference/links.html` -- the pages the decisions were made on

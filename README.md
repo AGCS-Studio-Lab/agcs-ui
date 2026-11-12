@@ -36,7 +36,7 @@ y reglas de UX. Donde algo de aquí choque con la marca, se corrige aquí.
 | `SKILL.md` | Instrucciones para agentes: reglas duras y archivos clave. |
 | `preview/` | Tarjetas del panel del design system en Claude Design. |
 | `fonts/` | Las cinco caras que usan las apps, copiadas de agcs-design-system. |
-| `ui/` | Primitivos de marca para copiar en cada app: chevron, footer, stamp de Lab, ícono, el menú y disclosure (`disclosure.jsx` con `disclosure.css`) y los enlaces (`link.css`). |
+| `ui/` | Primitivos de marca para copiar en cada app: chevron, footer, stamp de Lab, ícono, el menú y disclosure (`disclosure.jsx` con `disclosure.css`), Select (`select.jsx` con `select.css`) y los enlaces (`link.css`). |
 | `reference/paleta-dashboards.html` | La página con la que se decidió la paleta: dashboard de muestra, simulación de daltonismo y pruebas. Se abre en el navegador. |
 | `reference/grid-apps.html` | La página con la que se decidió el grid: los cuatro lugares, tres densidades y el gráfico alineado. |
 | `reference/menu-disclosure.html` | La página con la que se decidió el menú y el disclosure: cuándo es cada uno, sus estados y el móvil. |
@@ -68,8 +68,8 @@ Cuando haya una tercera app se revisa si conviene publicarlo como paquete.
 
 ## Menú y disclosure
 
-`ui/disclosure.jsx` es el único toggle de las apps. Cada app lo copia con
-`ui/disclosure.css`, sin editarlo, y no arma toggles propios. Es React sin
+`ui/disclosure.jsx` reúne los toggles de contenido y navegación de las apps.
+Cada app lo copia con `ui/disclosure.css`, sin editarlo, y no arma toggles propios. Es React sin
 dependencias y sirve en React 18 (DRIS) y 19 (management). Los tipos van en
 JSDoc: management los lee con `allowJs` y DRIS revisa el archivo con `checkJs`.
 El CSS es plano y usa los roles de `tokens/colors.css`, así que no depende de
@@ -183,6 +183,93 @@ Las pruebas corren cada caso con React 19 y con React 18, y revisan las reglas
 duras en el CSS: radio 0, sombra 0, 44 px, colores por rol y movimiento
 reducido.
 
+## Select
+
+Usa `Select` para todos los campos de elección: siempre permite escribir y
+filtrar sin distinguir mayúsculas ni acentos. Sustituye los `<select>` nativos,
+Radix Select/Popover/Combobox y los dropdowns propios de las apps. La lista es
+parte del campo y, junto con `Menu`, es el único popup anclado permitido.
+
+Copia `ui/select.jsx`, `ui/select.css` y `ui/disclosure.jsx` a la carpeta
+vendorizada de la app. Copia `tools/check-toggles.mjs` a `tools/` para CI.
+Conserva la ruta relativa entre los dos JSX. Añade a cada copia la cabecera
+con el SHA que estás copiando (en CSS, usa comentario `/* … */`; en el checker,
+colócala después del shebang):
+
+```js
+// Copiado de AGCS-Studio-Lab/agcs-ui@<sha> (ui/select.jsx). No editar aquí: el cambio va en agcs-ui.
+```
+
+Importa `select.css` después de `tokens/colors.css`. `ToggleIcon` viene de
+`disclosure.jsx`; el CSS de Select incluye su aspecto. El modo oscuro hereda
+los roles del contenedor con `data-mode="dark"`, también al abrir la lista.
+No necesita `darkMode` ni un portal.
+
+```jsx
+import { Select } from "@/agcs-ui/ui/select"; // DRIs: "@agcs-ui/ui/select"
+
+<label htmlFor="area">Área</label>
+<Select id="area" name="area" value={area} onChange={(value, option) => setArea(value)}
+  options={[{ value: "ops", label: "Operaciones", hint: "Equipo regional" }]}
+  placeholder="Seleccionar" emptyLabel="Sin área" required />
+```
+
+- Usa `value` y `onChange(value, option)` para controlarlo, o `defaultValue`
+  para dejar el estado al campo. Los valores se normalizan a string.
+  `emptyLabel` añade la opción de limpiar: devuelve `""` y `option=null`.
+  `name` genera un input oculto para `FormData`; disabled no se envía.
+- Cada opción lleva `value`, `label` de texto y, si hace falta, `disabled` y
+  `hint`. Para migrar `SearchSelect`, convierte `description` en `hint`.
+  No hay grupos ni selección múltiple: el inventario de las apps no los usa.
+- `onCreate(text)` ofrece `Crear «texto»` cuando no existe esa etiqueta;
+  `createLabel(text)` cambia el texto. La app guarda la entidad y actualiza
+  `options` y `value`. Para CTG, convierte `{id,name}` a `{value:id,label:name}`;
+  al crear conserva `{id:null,name:text}` en la app y añade una opción temporal
+  para mostrarlo. Al limpiar, adapta `""` a `null` si tu modelo lo necesita.
+- `freeText` guarda cada edición con `onChange(text, null)` y conserva el
+  texto al salir; también permite elegir una sugerencia. Sirve para nombres
+  de organización que aún no están en la lista.
+- `id`, `required`, los atributos `aria-*` y el ref llegan al input. El ref
+  ahora es `HTMLInputElement`: cambia los tipos de los antiguos refs a botón.
+  Usa `onOpenChange` para observar la lista y `className` para el contenedor.
+  La app conserva sus acciones de invitar personas y sus efectos al elegir.
+
+Flechas abren y recorren las opciones habilitadas; Inicio/Fin van a los
+extremos. Enter elige. Escape, Tab y clic afuera cierran sin elegir y
+restauran la etiqueta seleccionada; con `freeText`, conservan el texto.
+El foco se queda en el input. Con Popover API, la lista usa la capa superior
+sin salir del subárbol del diálogo: evita recortes y transformaciones,
+se ajusta al scroll y gira hacia arriba si cabe mejor. Sin esa API usa
+posición absoluta y z-index 50; los recortes de ancestros afectan al fallback.
+
+### Checker de toggles
+
+Ejecuta `node tools/check-toggles.mjs` en CI. Escanea `src` y detecta
+`aria-expanded`, `<details>`, `<select>`, imports de toggles Radix/shadcn,
+`cmdk` y chevrons de Lucide. Cada hallazgo indica archivo, línea, regla y
+cómo migrarlo. Ignora dependencias, la carpeta `agcs-ui` y tests/specs.
+Para otra ubicación vendorizada, añádela a `ignore`.
+
+```json
+{
+  "roots": ["src"],
+  "ignore": ["src/vendor/agcs/**"],
+  "allow": [
+    {"path": "src/legacy.jsx", "rule": "native-select", "reason": "Migrar el formulario de alta"}
+  ]
+}
+```
+
+El archivo por defecto es `agcs-toggles.json`; puedes elegirlo con
+`--config ruta.json`. Los globs admiten `*`, `**`, `?` y `{a,b}`. Cada
+excepción exige motivo; sin `rule` permite todas las reglas de esa ruta.
+Una excepción que ya no encuentra nada falla: elimínala al migrar.
+`--write-baseline` reemplaza `allow` por los hallazgos actuales con motivo
+`baseline: migrar`; revísalos antes de incorporarlos. El checker es estático:
+no sustituye la revisión de wrappers ni de imports construidos dinámicamente.
+El [mapa de migración](docs/select-migration.md) enumera cada uso de los
+checkouts de DRIs y Forward y las adaptaciones que conserva cada app.
+
 ## Enlaces
 
 Un enlace va en tinta y siempre subrayado. En hover y con el foco usa el lime
@@ -242,5 +329,7 @@ Revisa también el grid. Si algo falla, el cambio no entra.
 - **v0.5 (15 oct 2026):** enlaces en tinta con el lime en hover y foco,
   `ui/link.css` (U7.3 del plan del 15 de octubre). `--text-link` deja de ser
   azul.
+- **v0.6 (11 nov 2026):** Select compartido con búsqueda, creación y texto libre;
+  lista en la capa superior y checker de toggles para CI.
 - **Pendiente:** tipografía de pantalla, espaciado, el resto de los componentes
   y pantallas base.

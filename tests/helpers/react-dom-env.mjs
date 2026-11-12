@@ -1,4 +1,4 @@
-// Entorno de prueba para ui/disclosure.jsx: un DOM de jsdom y el componente
+// Entorno de prueba para los componentes de ui/: un DOM de jsdom y el componente
 // compilado con esbuild dos veces, una con React 19 (management) y otra con
 // React 18 (DRIs). Cada prueba corre con las dos.
 import { build } from "esbuild";
@@ -35,6 +35,7 @@ export async function loadWith(version) {
     stdin: {
       contents: [
         `export * from ${JSON.stringify(join(root, "ui/disclosure.jsx"))};`,
+        `export * from ${JSON.stringify(join(root, "ui/select.jsx"))};`,
         `export { createElement, act, useState } from "react";`,
         `export { createRoot } from "react-dom/client";`,
       ].join("\n"),
