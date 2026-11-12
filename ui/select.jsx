@@ -106,13 +106,44 @@ export const Select = forwardRef(
       else openList();
     }
 
+    /** @param {EventTarget | null} target */
+    function isLabelText(target) {
+      return target instanceof Element && !rootRef.current?.contains(target)
+        && !target.closest('a[href], button, input, select, textarea, summary, audio[controls], video[controls]')
+        && Array.from(inputRef.current?.labels ?? []).some((label) => label.contains(target));
+    }
+
+    useEffect(() => {
+      const labels = Array.from(inputRef.current?.labels ?? []);
+      const keepFocus = (/** @type {MouseEvent} */ event) => {
+        // Conserva el foco: el blur con relatedTarget=null cerraría antes del clic.
+        if (isLabelText(event.target)) event.preventDefault();
+      };
+      const activate = (/** @type {MouseEvent} */ event) => {
+        if (!isLabelText(event.target) || event.defaultPrevented) return;
+        // Sustituye la activación del label por un único toggle, también sin puntero.
+        event.preventDefault();
+        toggle();
+      };
+      for (const label of labels) {
+        label.addEventListener("mousedown", keepFocus);
+        label.addEventListener("click", activate);
+      }
+      return () => {
+        for (const label of labels) {
+          label.removeEventListener("mousedown", keepFocus);
+          label.removeEventListener("click", activate);
+        }
+      };
+    });
+
     // El listener lee el cierre vigente sin desmontarse al escribir.
     const closeRef = useRef(close);
     closeRef.current = close;
     useEffect(() => {
       if (!expanded) return;
       const outside = (/** @type {PointerEvent} */ event) => {
-        if (event.target instanceof Node && !rootRef.current?.contains(event.target)) closeRef.current();
+        if (event.target instanceof Node && !rootRef.current?.contains(event.target) && !isLabelText(event.target)) closeRef.current();
       };
       // Radix escucha Escape en captura en document. Lo consume el campo
       // antes, en window, para que el primer Escape cierre solo la lista.
@@ -182,9 +213,11 @@ export const Select = forwardRef(
     }, [expanded, activeRow, query]);
 
     return (
-      <div ref={rootRef} className={`agcs-select ${className}`} data-state={expanded ? "open" : "closed"}>
+      <div ref={rootRef} className={`agcs-select ${className}`} data-state={expanded ? "open" : "closed"}
+        onClick={(event) => { if (event.target !== inputRef.current) event.preventDefault(); }}>
         {name && <input type="hidden" name={name} value={selectedValue} disabled={disabled} />}
         <div className="agcs-select__field" data-disabled={disabled || undefined}
+          onMouseDown={(event) => { if (event.target === event.currentTarget) event.preventDefault(); }}
           onClick={(event) => { if (event.target === event.currentTarget) toggle(); }}>
           <input {...inputProps} id={id} ref={inputRef} type="text" role="combobox"
             className="agcs-select__input" autoComplete="off" disabled={disabled}

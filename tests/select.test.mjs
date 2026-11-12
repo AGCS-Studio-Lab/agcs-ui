@@ -15,6 +15,136 @@ for (const version of REACT_VERSIONS) {
     let lib;
     before(async () => { lib = await loadWith(version); });
     const render = (props = {}) => mount(lib, lib.createElement(lib.Select, { options, "aria-label": "Área", ...props }));
+    const renderLabeled = (explicit = false, props = {}) => {
+      const select = lib.createElement(lib.Select, { options, id: "area", name: "area", ...props });
+      const text = lib.createElement("span", { "data-label-text": true }, "Área");
+      return mount(lib, explicit
+        ? lib.createElement("div", null, lib.createElement("label", { htmlFor: "area" }, text), select)
+        : lib.createElement("label", null, text, select));
+    };
+    async function click(view, target, detail = 1) {
+      const event = new window.MouseEvent("click", { bubbles: true, cancelable: true, detail });
+      view.act(() => target.dispatchEvent(event));
+      await Promise.resolve();
+      return event;
+    }
+    for (const explicit of [false, true]) {
+      const labeling = explicit ? "label for=id" : "wrapping label";
+      it(`${labeling}: option clicks commit and cancel label activation`, async () => {
+        const changes = [];
+        const view = renderLabeled(explicit, { onChange: (...args) => changes.push(args) });
+        const input = view.$('[role="combobox"]');
+        let clicks = 0;
+        input.addEventListener("click", () => clicks++);
+        try {
+          await click(view, input);
+          clicks = 0;
+          const event = await click(view, view.$('[role="option"] span'));
+          assert.equal(event.defaultPrevented, true);
+          assert.equal(clicks, 0);
+          assert.equal(input.getAttribute("aria-expanded"), "false");
+          assert.equal(view.$('[role="listbox"]').hidden, true);
+          assert.equal(input.value, "Árbol");
+          assert.equal(view.$('[type="hidden"]').value, "a");
+          assert.deepEqual(changes, [["a", options[0]]]);
+          assert.equal(document.activeElement, input);
+        } finally { view.unmount(); }
+      });
+      for (const selector of [".agcs-select__chevron svg", ".agcs-select__field"]) {
+        it(`${labeling}: ${selector} toggles once without forwarding an input click`, async () => {
+          const changes = [];
+          const view = renderLabeled(explicit, { onOpenChange: (open) => changes.push(open) });
+          const input = view.$('[role="combobox"]');
+          let clicks = 0;
+          input.addEventListener("click", () => clicks++);
+          try {
+            for (const expanded of [true, false]) {
+              const target = view.$(selector);
+              view.act(() => pointerDown(target));
+              await Promise.resolve();
+              const down = new window.MouseEvent("mousedown", { bubbles: true, cancelable: true });
+              view.act(() => {
+                target.dispatchEvent(down);
+                // jsdom no ejecuta el cambio de foco por defecto de mousedown.
+                if (!down.defaultPrevented) input.blur();
+              });
+              assert.equal(down.defaultPrevented, true);
+              const event = await click(view, target);
+              assert.equal(event.defaultPrevented, true);
+              assert.equal(clicks, 0);
+              assert.equal(input.getAttribute("aria-expanded"), String(expanded));
+              assert.equal(view.$('[role="listbox"]').hidden, !expanded);
+              assert.equal(document.activeElement, input);
+            }
+            assert.deepEqual(changes, [true, false]);
+          } finally { view.unmount(); }
+        });
+      }
+      it(`${labeling}: creation and panel clicks cancel label activation`, async () => {
+        const created = [];
+        const view = renderLabeled(explicit, { onCreate: (text) => created.push(text) });
+        const input = view.$('[role="combobox"]');
+        let clicks = 0;
+        input.addEventListener("click", () => clicks++);
+        try {
+          type(view, " Nuevo ");
+          const event = await click(view, view.$('[role="option"]'));
+          assert.equal(event.defaultPrevented, true);
+          assert.equal(clicks, 0);
+          assert.deepEqual(created, ["Nuevo"]);
+          assert.equal(input.getAttribute("aria-expanded"), "false");
+          assert.equal(view.$('[role="listbox"]').hidden, true);
+          assert.equal(view.$('[type="hidden"]').value, "");
+          assert.equal(document.activeElement, input);
+          type(view, "ar");
+          assert.equal((await click(view, view.$('[role="listbox"]'))).defaultPrevented, true);
+          assert.equal(clicks, 0);
+          assert.equal(input.getAttribute("aria-expanded"), "true");
+        } finally { view.unmount(); }
+        const empty = renderLabeled(explicit, { options: [] });
+        try {
+          await click(empty, empty.$('[role="combobox"]'));
+          let forwarded = 0;
+          empty.$('[role="combobox"]').addEventListener("click", () => forwarded++);
+          assert.equal((await click(empty, empty.$('[role="status"]'))).defaultPrevented, true);
+          assert.equal(forwarded, 0);
+          assert.equal(empty.$('[role="combobox"]').getAttribute("aria-expanded"), "true");
+        } finally { empty.unmount(); }
+      });
+      it(`${labeling}: label text toggles without an intermediate close or blur`, async () => {
+        const changes = [];
+        let blurs = 0;
+        const view = renderLabeled(explicit, { onOpenChange: (open) => changes.push(open), onBlur: () => blurs++ });
+        const input = view.$('[role="combobox"]');
+        const text = view.$('[data-label-text]');
+        try {
+          for (const expanded of [true, false]) {
+            view.act(() => pointerDown(text));
+            await Promise.resolve();
+            assert.equal(input.getAttribute("aria-expanded"), String(!expanded));
+            const down = new window.MouseEvent("mousedown", { bubbles: true, cancelable: true });
+            view.act(() => {
+              text.dispatchEvent(down);
+              // jsdom no mueve el foco por mousedown; reproduce el blur nativo si procede.
+              if (!down.defaultPrevented) input.blur();
+            });
+            assert.equal(down.defaultPrevented, true);
+            await click(view, text);
+            assert.equal(input.getAttribute("aria-expanded"), String(expanded));
+            assert.equal(document.activeElement, input);
+          }
+          assert.equal(blurs, 0);
+          assert.deepEqual(changes, [true, false]);
+          // Un clic de tecnología de asistencia no necesita un pointerdown previo.
+          await click(view, input, 0);
+          assert.equal(input.getAttribute("aria-expanded"), "true");
+          await click(view, input, 0);
+          assert.equal(input.getAttribute("aria-expanded"), "true");
+          await click(view, text, 0);
+          assert.equal(input.getAttribute("aria-expanded"), "false");
+        } finally { view.unmount(); }
+      });
+    }
     it("declares the editable combobox, labels, form value and forwarded input ref", () => {
       const ref = { current: null };
       const view = render({ ref, id: "area", name: "area", defaultValue: "c", required: true,
