@@ -167,6 +167,12 @@ export { Command } from "cmdk"`;
     const source = `const pattern = <RegExp>/["'\x60{}] <select> aria-expanded=true/;\nimport "cmdk";`;
     assert.deepEqual(scan(source, "a.ts"), [{ path: "a.ts", line: 2, rule: "cmdk-import" }]);
   });
+  for (const assertion of ["<RegExp /* comment */>", "<RegExp /* comment */ >", "<RegExp /*\n comment */>", "<RegExp /*\n comment */\n >"]) {
+    it(`preserves regex literals after a TypeScript assertion with a trailing block comment: ${JSON.stringify(assertion)}`, () => {
+      const source = `const pattern = ${assertion}/["'\x60{}] <select> aria-expanded=true/;\nimport "cmdk";`;
+      assert.deepEqual(scan(source, "a.ts"), [{ path: "a.ts", line: source.split("\n").length, rule: "cmdk-import" }]);
+    });
+  }
   for (const [open, close] of [["SCRIPT", "SCRIPT"], ["sCrIpT", "ScRiPt"], ["script", "SCRIPT"], ["SCRIPT", "script"]]) {
     it(`scans HTML ${open}/${close} scripts and real elements after the closing tag`, () => {
       assert.deepEqual(scan(`<${open}>import "cmdk";</${close}>`, "a.html"),

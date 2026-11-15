@@ -79,7 +79,8 @@ function executableSource(source, path) {
       if (source[i] === '"' || source[i] === "'") quoted(false);
       else if (source[i] === "{") { i++; js(true); }
       else if (source[i] === ">") {
-        const selfClosing = source[i - 1] === "/";
+        // El cierre de comentario de una assertion TS no es un delimitador JSX />.
+        const selfClosing = source[i - 1] === "/" && source[i - 2] !== "*";
         i++;
         return { name, closing, selfClosing };
       } else i++;
