@@ -230,6 +230,36 @@ export { Command } from "cmdk"`;
         [{ path: "a.tsx", line: 2, rule: "cmdk-import" }]);
     });
   }
+  // R5 / r4580006718: attribute punctuation must not open a type constraint.
+  it("R5 masks the reported extends-data JSX text", () => {
+    assert.deepEqual(scan('<T extends-data>import "cmdk"</T>\nimport "cmdk";', "a.tsx"),
+      [{ path: "a.tsx", line: 2, rule: "cmdk-import" }]);
+  });
+  for (const name of ["T", "const"]) {
+    for (const attribute of ["extends-data", "extends:kind", "extends-1"]) {
+      it(`R5 masks valid nested JSX text after ${name} ${attribute}`, () => {
+        const source = `const node = <><${name} ${attribute}>import "cmdk"</${name}>\nimport "cmdk";</>;\nimport "cmdk";`;
+        assert.deepEqual(scan(source, "a.tsx"), [{ path: "a.tsx", line: 3, rule: "cmdk-import" }]);
+      });
+    }
+  }
+  for (const constraint of ["object", "\"value\"", "1", "-1", "-.5", "- 1", "-/* comment */1"]) {
+    for (const trivia of constraint === "object" || constraint === "1" ? [" "] : [" ", ""]) {
+      it(`R5 preserves the TSX constraint extends${trivia}${constraint}`, () => {
+        assert.deepEqual(scan(`const f = <T extends${trivia}${constraint}>(x: T) => x;\nimport "cmdk";`, "a.tsx"),
+          [{ path: "a.tsx", line: 2, rule: "cmdk-import" }]);
+      });
+    }
+  }
+  // R6 / r4580006721: JS/TS identifier starts and continuations include Unicode.
+  for (const name of ["Τ", "名", "𐐀", "TΤ", "T\u0301", "T\u200c", "T\u200d", "$T", "_T", "constΤ", "extendsΤ"]) {
+    for (const modifier of ["", "const "]) {
+      it(`R6 preserves the executable import after TSX ${modifier}${name}`, () => {
+        assert.deepEqual(scan(`const f = <${modifier}${name},>(x: ${name}) => x;\nimport "cmdk";`, "a.tsx"),
+          [{ path: "a.tsx", line: 2, rule: "cmdk-import" }]);
+      });
+    }
+  }
   it("preserves regex literals after TypeScript assertions without treating them as JSX values", () => {
     const source = `const pattern = <RegExp>/["'\x60{}] <select> aria-expanded=true/;\nimport "cmdk";`;
     assert.deepEqual(scan(source, "a.ts"), [{ path: "a.ts", line: 2, rule: "cmdk-import" }]);

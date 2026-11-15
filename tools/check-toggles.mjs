@@ -10,7 +10,9 @@ const extensions = /\.(?:js|jsx|ts|tsx|mjs|cjs|html)$/;
 const ruleIds = ["aria-expanded", "details-element", "native-select", "radix-toggle-import",
   "shadcn-toggle-import", "cmdk-import", "lucide-chevron"];
 const typeTrivia = String.raw`(?:\s|\/\*[\s\S]*?\*\/|\/\/[^\r\n]*(?:\r?\n|$))*`;
-const typeParameterPrefix = new RegExp(String.raw`^<${typeTrivia}(?:const\b${typeTrivia}(?!extends\b))?[\w$]+${typeTrivia}(?:,|=|extends\b${typeTrivia}[^\s=>/])`);
+const typeIdentifierPart = String.raw`[$\u200c\u200d\p{ID_Continue}]`;
+const typeIdentifier = String.raw`[$_\p{ID_Start}]${typeIdentifierPart}*`;
+const typeParameterPrefix = new RegExp(String.raw`^<${typeTrivia}(?:const(?!${typeIdentifierPart})${typeTrivia}(?!extends(?!${typeIdentifierPart})))?${typeIdentifier}${typeTrivia}(?:,|=|extends(?!${typeIdentifierPart})${typeTrivia}(?:[^\s=>/:-]|-${typeTrivia}(?:\d|\.\d)))`, "u");
 
 /** Glob pequeño: *, **, ?, y alternativas {a,b}; siempre con /. */
 function glob(pattern) {
@@ -91,11 +93,12 @@ function executableSource(source, path) {
     }
     return { name, closing, selfClosing: true };
   };
-  const jsx = () => {
+  const jsx = (nested = false) => {
     // .ts admite assertions, no JSX; en .tsx la coma/extends/default desambigua
     // parámetros de tipo, con const y comentarios opcionales antes del separador.
+    // Los hijos de un elemento ya son JSX, incluso con un atributo extends-1.
     // El texto de un literal posterior no decide la gramática.
-    const typeOnly = /\.ts$/.test(path) || (/\.tsx$/.test(path)
+    const typeOnly = /\.ts$/.test(path) || (!nested && /\.tsx$/.test(path)
       && typeParameterPrefix.test(source.slice(i)));
     const opened = tag(typeOnly);
     if (typeOnly) return false;
@@ -103,7 +106,7 @@ function executableSource(source, path) {
     while (i < source.length) {
       if (source.startsWith("<!--", i)) comment("-->", 4);
       else if (source.startsWith("</", i)) { tag(); return true; }
-      else if (source[i] === "<" && /[\w>]/.test(source[i + 1] ?? "")) jsx();
+      else if (source[i] === "<" && /[\w>]/.test(source[i + 1] ?? "")) jsx(true);
       else if (source[i] === "{") { i++; js(true); }
       else { mask(i, i + 1); i++; }
     }
