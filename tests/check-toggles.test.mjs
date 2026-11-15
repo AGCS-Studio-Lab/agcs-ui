@@ -151,6 +151,47 @@ export { Command } from "cmdk"`;
     assert.deepEqual(scan(source, "a.ts").map(({ line, rule }) => [line, rule]),
       [[2, "lucide-chevron"], [5, "cmdk-import"]]);
   });
+  for (const expression of ["counter++", "counter--", "counter++ /* comment */", "(counter)", "getValue()", "object.if(ready)", "items[0]", '"text"', "`text`", "<Widget />", "<Widget>text</Widget>"]) {
+    it(`preserves division after ${expression} and reports the next import`, () => {
+      assert.deepEqual(scan(`${expression} / divisor;\nimport "cmdk";`, "a.jsx"),
+        [{ path: "a.jsx", line: 2, rule: "cmdk-import" }]);
+    });
+  }
+  it("keeps regex literals masked after operators and control parentheses", () => {
+    for (const prefix of ["const pattern =", "counter++ +", "counter+++", "counter-- -", "if (ready)", "if (check(ready))", "while (ready)", "for (; ready;)"]) {
+      const source = `${prefix} /["'\x60{}] <select> aria-expanded=true/.test(text);\nimport "cmdk";`;
+      assert.deepEqual(scan(source, "a.js"), [{ path: "a.js", line: 2, rule: "cmdk-import" }], prefix);
+    }
+  });
+  it("preserves regex literals after TypeScript assertions without treating them as JSX values", () => {
+    const source = `const pattern = <RegExp>/["'\x60{}] <select> aria-expanded=true/;\nimport "cmdk";`;
+    assert.deepEqual(scan(source, "a.ts"), [{ path: "a.ts", line: 2, rule: "cmdk-import" }]);
+  });
+  for (const [open, close] of [["SCRIPT", "SCRIPT"], ["sCrIpT", "ScRiPt"], ["script", "SCRIPT"], ["SCRIPT", "script"]]) {
+    it(`scans HTML ${open}/${close} scripts and real elements after the closing tag`, () => {
+      assert.deepEqual(scan(`<${open}>import "cmdk";</${close}>`, "a.html"),
+        [{ path: "a.html", line: 1, rule: "cmdk-import" }]);
+      const source = [
+        `<${open} type="module">`,
+        `const text = "<select> aria-expanded=true import 'cmdk' </${close}>";`,
+        'const template = `<details> import "cmdk";`;',
+        'import "cmdk";',
+        `</${close}>`,
+        'import "cmdk";', // Texto HTML, fuera del script.
+        '<details aria-expanded="false">import "cmdk";</details>',
+        '<select></select>',
+      ].join("\n");
+      assert.deepEqual(scan(source, "a.html").map(({ line, rule }) => [line, rule]).sort(), [
+        [4, "cmdk-import"], [7, "details-element"], [7, "aria-expanded"], [8, "native-select"],
+      ].sort());
+    });
+  }
+  it("keeps JSX Script components as markup and scans their executable children", () => {
+    assert.deepEqual(scan('const view = <Script>import "cmdk"; {require("cmdk")}</Script>;\nimport "cmdk";', "a.jsx"), [
+      { path: "a.jsx", line: 1, rule: "cmdk-import" },
+      { path: "a.jsx", line: 2, rule: "cmdk-import" },
+    ]);
+  });
   it("requires reasons, honors rule-specific allows and rejects stale entries", () => {
     const f = fixture({ "src/a.jsx": "<select aria-expanded={true}>" });
     const config = (allow) => writeFileSync(join(f.dir, "agcs-toggles.json"), JSON.stringify({ allow }));

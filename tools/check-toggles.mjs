@@ -88,18 +88,22 @@ function executableSource(source, path) {
   };
   const jsx = () => {
     const opened = tag();
-    if (opened.selfClosing || opened.closing) return;
+    if (opened.selfClosing || opened.closing) return true;
     // Un genérico/assertion de TS (<T>, <T,>) no tiene cierre de elemento.
-    if (!source.slice(i).includes(`</${opened.name}`)) return;
+    if (!source.slice(i).includes(`</${opened.name}`)) return false;
     while (i < source.length) {
       if (source.startsWith("<!--", i)) comment("-->", 4);
-      else if (source.startsWith("</", i)) { tag(); return; }
+      else if (source.startsWith("</", i)) { tag(); return true; }
       else if (source[i] === "<" && /[\w>]/.test(source[i + 1] ?? "")) jsx();
       else if (source[i] === "{") { i++; js(true); }
       else { mask(i, i + 1); i++; }
     }
   };
-  const startsExpression = () => {
+  const startsExpression = (token) => {
+    // Los literales/elementos y ++/-- terminan una expresión aunque su texto
+    // quede enmascarado o su último carácter también pueda ser un operador.
+    if (token === "value" || token === "++" || token === "--") return false;
+    if (token === "control)") return true;
     // Una comparación o un argumento de tipo (n<limit, fn<T>) no abre JSX.
     const before = chars.slice(0, i).join("").trimEnd();
     return !before || /[=([{,:;!?&|>+*/%~^-]$/.test(before) || /\b(?:return|yield|case)$/.test(before);
@@ -120,21 +124,37 @@ function executableSource(source, path) {
   };
   function js(braced = false, script = false) {
     let depth = 0;
+    let token = "";
+    const parens = [];
     while (i < source.length) {
-      if (script && source.startsWith("</script", i)) return;
+      if (script && /^<\/script(?=[\s/>])/i.test(source.slice(i))) return;
       if (source.startsWith("//", i)) comment("\n", 2);
       else if (source.startsWith("/*", i)) comment("*/", 2);
       else if (source.startsWith("<!--", i)) comment("-->", 4);
-      else if (source[i] === "/" && startsExpression()) regexp();
-      else if (source[i] === '"' || source[i] === "'") quoted(true);
-      else if (source[i] === "`") template();
-      else if (source[i] === "<" && /[a-zA-Z>]/.test(source[i + 1] ?? "") && startsExpression()) jsx();
-      else if (source[i] === "{") { depth++; i++; }
+      else if (source[i] === "/" && startsExpression(token)) { regexp(); token = "value"; }
+      else if (source[i] === '"' || source[i] === "'") { quoted(true); token = "value"; }
+      else if (source[i] === "`") { template(); token = "value"; }
+      else if (source[i] === "<" && /[a-zA-Z>]/.test(source[i + 1] ?? "") && startsExpression(token)) { token = jsx() ? "value" : ">"; }
+      else if (source.startsWith("++", i) || source.startsWith("--", i)) { token = source.slice(i, i + 2); i += 2; }
+      else if (/[\w$]/.test(source[i])) {
+        const start = i++;
+        while (/[\w$]/.test(source[i] ?? "")) i++;
+        token = token === "." ? "value" : source.slice(start, i);
+      } else if (source[i] === "(") {
+        // El cierre de if/while/for permite una sentencia con regex; una
+        // llamada o un grupo entre paréntesis permite división.
+        parens.push(/^(?:if|while|for|with|switch|catch)$/.test(token));
+        token = "("; i++;
+      } else if (source[i] === ")") { token = parens.pop() ? "control)" : ")"; i++; }
+      else if (source[i] === "{") { depth++; token = "{"; i++; }
       else if (source[i] === "}") {
         i++;
         if (braced && depth === 0) return;
-        depth--;
-      } else i++;
+        depth--; token = "}";
+      } else {
+        if (!/\s/.test(source[i])) token = source[i];
+        i++;
+      }
     }
   }
   if (/\.html$/.test(path)) {
@@ -144,7 +164,7 @@ function executableSource(source, path) {
       else if (source.startsWith("/*", i)) comment("*/", 2);
       else if (source[i] === "<" && /[a-zA-Z/!]/.test(source[i + 1] ?? "")) {
         const opened = tag();
-        if (opened.name === "script" && !opened.closing) js(false, true);
+        if (opened.name.toLowerCase() === "script" && !opened.closing) js(false, true);
       } else { mask(i, i + 1); i++; }
     }
   } else js();
