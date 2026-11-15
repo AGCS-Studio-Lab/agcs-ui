@@ -88,10 +88,13 @@ function executableSource(source, path) {
     return { name, closing, selfClosing: true };
   };
   const jsx = () => {
+    // .ts admite assertions, no JSX; en .tsx la coma/extends desambigua
+    // parámetros de tipo. El texto de un literal posterior no decide la gramática.
+    const typeOnly = /\.ts$/.test(path) || (/\.tsx$/.test(path)
+      && /^<[\w$]+\s*(?:,|extends\s+[^\s=>/])/.test(source.slice(i)));
     const opened = tag();
+    if (typeOnly) return false;
     if (opened.selfClosing || opened.closing) return true;
-    // Un genérico/assertion de TS (<T>, <T,>) no tiene cierre de elemento.
-    if (!source.slice(i).includes(`</${opened.name}`)) return false;
     while (i < source.length) {
       if (source.startsWith("<!--", i)) comment("-->", 4);
       else if (source.startsWith("</", i)) { tag(); return true; }
@@ -104,7 +107,7 @@ function executableSource(source, path) {
     // Los literales/elementos y ++/-- terminan una expresión aunque su texto
     // quede enmascarado o su último carácter también pueda ser un operador.
     if (token === "value" || token === "++" || token === "--") return false;
-    if (token === "control)") return true;
+    if (token === "control)" || token === "block}" || token === "else" || token === "do") return true;
     // Una comparación o un argumento de tipo (n<limit, fn<T>) no abre JSX.
     const before = chars.slice(0, i).join("").trimEnd();
     return !before || /[=([{,:;!?&|>+*/%~^-]$/.test(before) || /\b(?:return|yield|case)$/.test(before);
@@ -127,6 +130,7 @@ function executableSource(source, path) {
     let depth = 0;
     let token = "";
     const parens = [];
+    const blocks = [];
     while (i < source.length) {
       if (script && /^<\/script(?=[\s/>])/i.test(source.slice(i))) return;
       if (source.startsWith("//", i)) comment("\n", 2);
@@ -147,11 +151,17 @@ function executableSource(source, path) {
         parens.push(/^(?:if|while|for|with|switch|catch)$/.test(token));
         token = "("; i++;
       } else if (source[i] === ")") { token = parens.pop() ? "control)" : ")"; i++; }
-      else if (source[i] === "{") { depth++; token = "{"; i++; }
+      else if (source[i] === "{") {
+        // Solo un bloque de sentencias permite otro regex al cerrarse;
+        // un objeto conserva la división, incluso con objetos anidados.
+        blocks.push((token === "" && !braced) || token === ";" || token === "block}" || token === "control)"
+          || /^(?:else|do|try|finally)$/.test(token) || (token === "{" && blocks.at(-1) === true));
+        depth++; token = "{"; i++;
+      }
       else if (source[i] === "}") {
         i++;
         if (braced && depth === 0) return;
-        depth--; token = "}";
+        depth--; token = blocks.pop() ? "block}" : "}";
       } else {
         if (!/\s/.test(source[i])) token = source[i];
         i++;

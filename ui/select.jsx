@@ -163,6 +163,7 @@ export const Select = forwardRef(
       };
     }, [expanded]);
     useEffect(() => { if (disabled && open) closeRef.current(); }, [disabled, open]);
+    useEffect(() => { if (!freeText) setTextValue(null); }, [freeText]);
     const previousValueRef = useRef(selectedValue);
     useEffect(() => {
       // Conserva también una edición que el padre aún no ha aceptado.
@@ -171,10 +172,8 @@ export const Select = forwardRef(
     }, [selectedValue, textValue]);
     const resetRef = useRef(() => {});
     resetRef.current = () => {
-      if (value === undefined) {
-        setOwnValue(defaultValue);
-        setTextValue(null);
-      }
+      if (value === undefined) setOwnValue(defaultValue);
+      setTextValue(null);
       closeRef.current();
       setEdited(false);
       setActive(0);

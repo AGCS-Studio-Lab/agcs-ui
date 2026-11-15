@@ -151,7 +151,7 @@ export { Command } from "cmdk"`;
     assert.deepEqual(scan(source, "a.ts").map(({ line, rule }) => [line, rule]),
       [[2, "lucide-chevron"], [5, "cmdk-import"]]);
   });
-  for (const expression of ["counter++", "counter--", "counter++ /* comment */", "(counter)", "getValue()", "object.if(ready)", "items[0]", '"text"', "`text`", "<Widget />", "<Widget>text</Widget>"]) {
+  for (const expression of ["const object = {}", "const object = { nested: {} }", "({})", "counter++", "counter--", "counter++ /* comment */", "(counter)", "getValue()", "object.if(ready)", "items[0]", '"text"', "`text`", "<Widget />", "<Widget>text</Widget>"]) {
     it(`preserves division after ${expression} and reports the next import`, () => {
       assert.deepEqual(scan(`${expression} / divisor;\nimport "cmdk";`, "a.jsx"),
         [{ path: "a.jsx", line: 2, rule: "cmdk-import" }]);
@@ -163,6 +163,51 @@ export { Command } from "cmdk"`;
       assert.deepEqual(scan(source, "a.js"), [{ path: "a.js", line: 2, rule: "cmdk-import" }], prefix);
     }
   });
+  // R1 / r4577918862: valid statement starts from the deferred review of #6.
+  for (const [prefix, suffix] of [
+    ["if (ok) {}", ""], ["if (ok) { if (other) {} }", ""],
+    ["if (ok) {} else", ""], ["if (ok) {} else {}", ""],
+    ["do", " while (ok);"], ["do {} while (ok);", ""],
+  ]) {
+    it(`R1 masks a regex statement after ${prefix}`, () => {
+      assert.deepEqual(scan(`${prefix}\n/["<select>]/.test(x);${suffix}\nimport "cmdk";`, "a.js"),
+        [{ path: "a.js", line: 3, rule: "cmdk-import" }]);
+    });
+  }
+  // R3 / r4577918871: .ts assertions cannot become JSX due to later text.
+  for (const closing of ['const closing = "</HTMLElement>";', "const closing = '</HTMLElement>';",
+    'const closing = `</HTMLElement>`;', '// </HTMLElement>', '/* </HTMLElement> */']) {
+    it(`R3 preserves the import after a TS assertion before ${closing}`, () => {
+      assert.deepEqual(scan(`const node = <HTMLElement>value;\nimport "cmdk";\n${closing}`, "a.ts"),
+        [{ path: "a.ts", line: 2, rule: "cmdk-import" }]);
+    });
+  }
+  for (const extension of ["jsx", "tsx", "js"]) {
+    it(`R3 preserves real nested JSX and masked strings in ${extension}`, () => {
+      const source = ['const node = <HTMLElement>text <Widget title="</HTMLElement>">',
+        '{"<select>"}<select /></Widget></HTMLElement>;', 'import "cmdk";'].join("\n");
+      assert.deepEqual(scan(source, `a.${extension}`), [
+        { path: `a.${extension}`, line: 2, rule: "native-select" },
+        { path: `a.${extension}`, line: 3, rule: "cmdk-import" },
+      ]);
+    });
+  }
+  it("preserves object-literal division inside executable template expressions", () => {
+    assert.deepEqual(scan('const text = `${{} / divisor}`;\nimport "cmdk";', "a.js"),
+      [{ path: "a.js", line: 2, rule: "cmdk-import" }]);
+  });
+  for (const attribute of ["extends", 'extends="yes"']) {
+    it(`preserves JSX text with a TSX ${attribute} attribute`, () => {
+      assert.deepEqual(scan(`const node = <Widget ${attribute}>import "cmdk";</Widget>;\nimport "cmdk";`, "a.tsx"),
+        [{ path: "a.tsx", line: 2, rule: "cmdk-import" }]);
+    });
+  }
+  for (const parameters of ["<T,>", "<T extends object>"]) {
+    it(`preserves TSX generic arrows with ${parameters}`, () => {
+      assert.deepEqual(scan(`const identity = ${parameters}(x: T) => x;\nimport "cmdk";`, "a.tsx"),
+        [{ path: "a.tsx", line: 2, rule: "cmdk-import" }]);
+    });
+  }
   it("preserves regex literals after TypeScript assertions without treating them as JSX values", () => {
     const source = `const pattern = <RegExp>/["'\x60{}] <select> aria-expanded=true/;\nimport "cmdk";`;
     assert.deepEqual(scan(source, "a.ts"), [{ path: "a.ts", line: 2, rule: "cmdk-import" }]);
