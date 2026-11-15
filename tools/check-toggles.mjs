@@ -9,6 +9,8 @@ const defaults = ["**/node_modules/**", "**/agcs-ui/**", "**/*.{test,spec}.{js,j
 const extensions = /\.(?:js|jsx|ts|tsx|mjs|cjs|html)$/;
 const ruleIds = ["aria-expanded", "details-element", "native-select", "radix-toggle-import",
   "shadcn-toggle-import", "cmdk-import", "lucide-chevron"];
+const typeTrivia = String.raw`(?:\s|\/\*[\s\S]*?\*\/|\/\/[^\r\n]*(?:\r?\n|$))*`;
+const typeParameterPrefix = new RegExp(String.raw`^<${typeTrivia}(?:const\b${typeTrivia}(?!extends\b))?[\w$]+${typeTrivia}(?:,|=|extends\b${typeTrivia}[^\s=>/])`);
 
 /** Glob pequeño: *, **, ?, y alternativas {a,b}; siempre con /. */
 function glob(pattern) {
@@ -70,13 +72,15 @@ function executableSource(source, path) {
       } else { mask(i, i + 1); i++; }
     }
   };
-  const tag = () => {
+  const tag = (typeOnly = false) => {
     const match = /^<\/?([\w.-]+)?/.exec(source.slice(i));
     const name = match[1] ?? "";
     const closing = source[i + 1] === "/";
     i += match[0].length;
     while (i < source.length) {
-      if (source[i] === '"' || source[i] === "'") quoted(false);
+      if (typeOnly && source.startsWith("//", i)) comment("\n", 2);
+      else if (typeOnly && source.startsWith("/*", i)) comment("*/", 2);
+      else if (source[i] === '"' || source[i] === "'") quoted(false);
       else if (source[i] === "{") { i++; js(true); }
       else if (source[i] === ">") {
         // El cierre de comentario de una assertion TS no es un delimitador JSX />.
@@ -88,11 +92,12 @@ function executableSource(source, path) {
     return { name, closing, selfClosing: true };
   };
   const jsx = () => {
-    // .ts admite assertions, no JSX; en .tsx la coma/extends desambigua
-    // parámetros de tipo. El texto de un literal posterior no decide la gramática.
+    // .ts admite assertions, no JSX; en .tsx la coma/extends/default desambigua
+    // parámetros de tipo, con const y comentarios opcionales antes del separador.
+    // El texto de un literal posterior no decide la gramática.
     const typeOnly = /\.ts$/.test(path) || (/\.tsx$/.test(path)
-      && /^<[\w$]+\s*(?:,|extends\s+[^\s=>/])/.test(source.slice(i)));
-    const opened = tag();
+      && typeParameterPrefix.test(source.slice(i)));
+    const opened = tag(typeOnly);
     if (typeOnly) return false;
     if (opened.selfClosing || opened.closing) return true;
     while (i < source.length) {

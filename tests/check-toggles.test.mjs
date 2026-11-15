@@ -208,6 +208,28 @@ export { Command } from "cmdk"`;
         [{ path: "a.tsx", line: 2, rule: "cmdk-import" }]);
     });
   }
+  // L1: defaults, const parameters and trivia also disambiguate TSX generics.
+  for (const parameters of [
+    "<T = unknown>", "<T = { value: string }>", "<const T,>",
+    "<const T extends object>", "<const T = unknown>",
+    "<T /* comment */,>", "<T/* comment */= unknown>",
+    "<T /* comment */ extends object>", "<T extends /* comment */ object>",
+    "<const /* comment */ T,>", "<const\n T /* comment */ ,>",
+    "<T // comment\n ,>", "<T /*\n comment */ = unknown>",
+    "<T \n extends \n object>", '<T /* > <select> import "cmdk" */ ,>',
+  ]) {
+    it(`L1 preserves the executable import after TSX generic parameters ${JSON.stringify(parameters)}`, () => {
+      const source = `const identity = ${parameters}(x: T) => x;\nimport "cmdk";`;
+      assert.deepEqual(scan(source, "a.tsx"),
+        [{ path: "a.tsx", line: source.split("\n").length, rule: "cmdk-import" }]);
+    });
+  }
+  for (const attributes of ["T", "extends", 'extends="yes"']) {
+    it(`L1 preserves JSX text in a const element with ${attributes}`, () => {
+      assert.deepEqual(scan(`const node = <const ${attributes}>import "cmdk";</const>;\nimport "cmdk";`, "a.tsx"),
+        [{ path: "a.tsx", line: 2, rule: "cmdk-import" }]);
+    });
+  }
   it("preserves regex literals after TypeScript assertions without treating them as JSX values", () => {
     const source = `const pattern = <RegExp>/["'\x60{}] <select> aria-expanded=true/;\nimport "cmdk";`;
     assert.deepEqual(scan(source, "a.ts"), [{ path: "a.ts", line: 2, rule: "cmdk-import" }]);
