@@ -9,6 +9,10 @@ const defaults = ["**/node_modules/**", "**/agcs-ui/**", "**/*.{test,spec}.{js,j
 const extensions = /\.(?:js|jsx|ts|tsx|mjs|cjs|html)$/;
 const ruleIds = ["aria-expanded", "details-element", "native-select", "radix-toggle-import",
   "shadcn-toggle-import", "cmdk-import", "lucide-chevron"];
+const typeTrivia = String.raw`(?:\s|\/\*[\s\S]*?\*\/|\/\/[^\r\n]*(?:\r?\n|$))*`;
+const typeIdentifierPart = String.raw`[$\u200c\u200d\p{ID_Continue}]`;
+const typeIdentifier = String.raw`[$_\p{ID_Start}]${typeIdentifierPart}*`;
+const typeParameterPrefix = new RegExp(String.raw`^<${typeTrivia}(?:const(?!${typeIdentifierPart})${typeTrivia}(?!extends(?!${typeIdentifierPart})))?${typeIdentifier}${typeTrivia}(?:,|=|extends(?!${typeIdentifierPart})${typeTrivia}(?:[^\s=>/:-]|-${typeTrivia}(?:\d|\.\d)))`, "u");
 
 /** Glob pequeño: *, **, ?, y alternativas {a,b}; siempre con /. */
 function glob(pattern) {
@@ -70,13 +74,15 @@ function executableSource(source, path) {
       } else { mask(i, i + 1); i++; }
     }
   };
-  const tag = () => {
+  const tag = (typeOnly = false) => {
     const match = /^<\/?([\w.-]+)?/.exec(source.slice(i));
     const name = match[1] ?? "";
     const closing = source[i + 1] === "/";
     i += match[0].length;
     while (i < source.length) {
-      if (source[i] === '"' || source[i] === "'") quoted(false);
+      if (typeOnly && source.startsWith("//", i)) comment("\n", 2);
+      else if (typeOnly && source.startsWith("/*", i)) comment("*/", 2);
+      else if (source[i] === '"' || source[i] === "'") quoted(false);
       else if (source[i] === "{") { i++; js(true); }
       else if (source[i] === ">") {
         // El cierre de comentario de una assertion TS no es un delimitador JSX />.
@@ -87,15 +93,20 @@ function executableSource(source, path) {
     }
     return { name, closing, selfClosing: true };
   };
-  const jsx = () => {
-    const opened = tag();
+  const jsx = (nested = false) => {
+    // .ts admite assertions, no JSX; en .tsx la coma/extends/default desambigua
+    // parámetros de tipo, con const y comentarios opcionales antes del separador.
+    // Los hijos de un elemento ya son JSX, incluso con un atributo extends-1.
+    // El texto de un literal posterior no decide la gramática.
+    const typeOnly = /\.ts$/.test(path) || (!nested && /\.tsx$/.test(path)
+      && typeParameterPrefix.test(source.slice(i)));
+    const opened = tag(typeOnly);
+    if (typeOnly) return false;
     if (opened.selfClosing || opened.closing) return true;
-    // Un genérico/assertion de TS (<T>, <T,>) no tiene cierre de elemento.
-    if (!source.slice(i).includes(`</${opened.name}`)) return false;
     while (i < source.length) {
       if (source.startsWith("<!--", i)) comment("-->", 4);
       else if (source.startsWith("</", i)) { tag(); return true; }
-      else if (source[i] === "<" && /[\w>]/.test(source[i + 1] ?? "")) jsx();
+      else if (source[i] === "<" && /[\w>]/.test(source[i + 1] ?? "")) jsx(true);
       else if (source[i] === "{") { i++; js(true); }
       else { mask(i, i + 1); i++; }
     }
@@ -104,7 +115,7 @@ function executableSource(source, path) {
     // Los literales/elementos y ++/-- terminan una expresión aunque su texto
     // quede enmascarado o su último carácter también pueda ser un operador.
     if (token === "value" || token === "++" || token === "--") return false;
-    if (token === "control)") return true;
+    if (token === "control)" || token === "block}" || token === "else" || token === "do") return true;
     // Una comparación o un argumento de tipo (n<limit, fn<T>) no abre JSX.
     const before = chars.slice(0, i).join("").trimEnd();
     return !before || /[=([{,:;!?&|>+*/%~^-]$/.test(before) || /\b(?:return|yield|case)$/.test(before);
@@ -127,6 +138,7 @@ function executableSource(source, path) {
     let depth = 0;
     let token = "";
     const parens = [];
+    const blocks = [];
     while (i < source.length) {
       if (script && /^<\/script(?=[\s/>])/i.test(source.slice(i))) return;
       if (source.startsWith("//", i)) comment("\n", 2);
@@ -147,11 +159,17 @@ function executableSource(source, path) {
         parens.push(/^(?:if|while|for|with|switch|catch)$/.test(token));
         token = "("; i++;
       } else if (source[i] === ")") { token = parens.pop() ? "control)" : ")"; i++; }
-      else if (source[i] === "{") { depth++; token = "{"; i++; }
+      else if (source[i] === "{") {
+        // Solo un bloque de sentencias permite otro regex al cerrarse;
+        // un objeto conserva la división, incluso con objetos anidados.
+        blocks.push((token === "" && !braced) || token === ";" || token === "block}" || token === "control)"
+          || /^(?:else|do|try|finally)$/.test(token) || (token === "{" && blocks.at(-1) === true));
+        depth++; token = "{"; i++;
+      }
       else if (source[i] === "}") {
         i++;
         if (braced && depth === 0) return;
-        depth--; token = "}";
+        depth--; token = blocks.pop() ? "block}" : "}";
       } else {
         if (!/\s/.test(source[i])) token = source[i];
         i++;

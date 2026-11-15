@@ -235,6 +235,81 @@ for (const version of REACT_VERSIONS) {
         } finally { view.unmount(); }
       }
     });
+    // R2 / r4577918867: reset clears local provenance even at the same controlled id.
+    for (const external of [false, true]) {
+      it(`R2 controlled free text reset restores the selected label (${external ? "external" : "nested"})`, async () => {
+        const changes = [];
+        const select = lib.createElement(lib.Select, { options: [{ value: "a", label: "Árbol" }],
+          value: "a", freeText: true, name: "area", form: external ? "literal-reset" : undefined,
+          onChange: (...args) => changes.push(args) });
+        const view = mount(lib, external
+          ? lib.createElement("div", null, lib.createElement("form", { id: "literal-reset" }), select)
+          : lib.createElement("form", null, select));
+        try {
+          const input = view.$('[role="combobox"]');
+          const form = view.$("form");
+          type(view, "a");
+          view.act(() => keyDown(input, "Escape"));
+          assert.equal(input.value, "a");
+          // A later listener cancels the reset: keep literal provenance and open query.
+          const cancel = (event) => event.preventDefault();
+          view.container.addEventListener("reset", cancel);
+          await settle(() => form.reset());
+          assert.equal(input.value, "a");
+          view.act(() => input.click());
+          await settle(() => form.reset());
+          assert.equal(input.value, "a");
+          assert.equal(input.getAttribute("aria-expanded"), "true");
+          assert.deepEqual([...new window.FormData(form)], [["area", "a"]]);
+          view.container.removeEventListener("reset", cancel);
+          view.act(() => keyDown(input, "Escape"));
+          await settle(() => form.reset());
+          assert.equal(input.value, "Árbol");
+          assert.equal(input.getAttribute("aria-expanded"), "false");
+          assert.deepEqual([...new window.FormData(form)], [["area", "a"]]);
+          assert.deepEqual(changes, [["a", null]]);
+        } finally { view.unmount(); }
+      });
+    }
+    // R4 / r4577918874: disabling freeText discards the previous literal edit.
+    for (const controlled of [false, true]) {
+      it(`R4 free text mode changes clear stale literal provenance (${controlled ? "controlled" : "uncontrolled"})`, () => {
+        const choices = [{ value: "a", label: "Árbol" }];
+        const changes = [];
+        let setFreeText;
+        function Field() {
+          const [freeText, updateMode] = lib.useState(true);
+          const [value, updateValue] = lib.useState("a");
+          setFreeText = updateMode;
+          return lib.createElement("form", null, lib.createElement(lib.Select, {
+            options: choices, name: "area", freeText, ...(controlled ? { value } : { defaultValue: "a" }),
+            onChange: (next, option) => { changes.push([next, option]); updateValue(next); },
+          }));
+        }
+        const view = mount(lib, lib.createElement(Field));
+        try {
+          const input = view.$('[role="combobox"]');
+          type(view, "a");
+          view.act(() => keyDown(input, "Escape"));
+          assert.equal(input.value, "a");
+          for (const mode of [false, true, false, true]) {
+            view.act(() => setFreeText(mode));
+            assert.equal(input.value, "Árbol");
+            assert.deepEqual([...new window.FormData(view.$("form"))], [["area", "a"]]);
+            assert.deepEqual(changes, [["a", null]]);
+          }
+          view.act(() => input.click());
+          assert.equal(input.value, "Árbol");
+          type(view, "a");
+          view.act(() => keyDown(input, "Escape"));
+          assert.equal(input.value, "a");
+          view.act(() => keyDown(input, "ArrowDown"));
+          view.act(() => keyDown(input, "Enter"));
+          assert.equal(input.value, "Árbol");
+          assert.deepEqual(changes, [["a", null], ["a", null], ["a", choices[0]]]);
+        } finally { view.unmount(); }
+      });
+    }
     it("reset uses current defaults and form association across renders and survives reset-handler updates", async () => {
       let setSettings;
       function Field() {
