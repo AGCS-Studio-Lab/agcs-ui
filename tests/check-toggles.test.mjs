@@ -48,6 +48,109 @@ const x = <details><select aria-expanded={true} /></details>;` });
     const f = fixture(files, { ignore: ["src/legacy/**"] });
     try { assert.equal(f.run().status, 0); } finally { f.close(); }
   });
+  it("walks production cjs and excludes cjs tests, specs and mocks", () => {
+    const f = fixture({
+      "src/production.cjs": 'const command = require("cmdk");',
+      "src/skip.test.cjs": 'require("cmdk")',
+      "src/skip.spec.cjs": 'require("cmdk")',
+      "src/__mocks__/skip.cjs": 'require("cmdk")',
+    });
+    try {
+      const result = f.run();
+      assert.equal(result.status, 1);
+      assert.match(result.stderr, /src\/production.cjs:1 cmdk-import/);
+      assert.equal(result.stderr.trim().split("\n").length, 1);
+    } finally { f.close(); }
+  });
+  it("ignores string and template text while scanning executable interpolations at exact lines", () => {
+    const source = [
+      `const example = "<select> aria-expanded=true <details> import 'cmdk'";`,
+      `const escaped = 'can\\'t <select> require("cmdk")';`,
+      'const template = `<select> aria-expanded=true <details>',
+      'import "cmdk"; ${(() => {',
+      '  require("cmdk");',
+      '  const props = { "aria-expanded": true };',
+      '  const nested = `ignored <select> ${<select aria-expanded="true" />}`;',
+      '})()} more <details>`;',
+      '// <select> require("cmdk")',
+      '/* aria-expanded=true */',
+      'import { ChevronDown as Down } from "lucide-react";',
+      'export { Select } from "@/components/ui/select";',
+      `const real = <details title="<select> aria-expanded=true import 'cmdk'">`,
+      '  <select aria-expanded="false" data-note="<details>" />',
+      '</details>;',
+    ].join("\n");
+    assert.deepEqual(scan(source, "a.jsx").map(({ line, rule }) => [line, rule]).sort(), [
+      [5, "cmdk-import"], [6, "aria-expanded"], [7, "native-select"], [7, "aria-expanded"],
+      [11, "lucide-chevron"], [12, "shadcn-toggle-import"], [13, "details-element"],
+      [14, "native-select"], [14, "aria-expanded"],
+    ].sort());
+  });
+  it("preserves module specifiers and quoted attribute/property names without scanning their content", () => {
+    const source = [
+      `import "cmdk";`,
+      `const x = import(/* note */ "@radix-ui/react-select");`,
+      `import { ChevronUp as Up } from 'lucide-react';`,
+      `const props = { 'aria-expanded': true, text: "<select>" };`,
+      `const view = <Widget {...{ "aria-expanded": true }} title={'<details>'} />;`,
+      `const text = "import \\"cmdk\\"";`,
+      `const paths = ['cmdk', '@radix-ui/react-select'];`,
+    ].join("\n");
+    assert.deepEqual(scan(source, "a.tsx").map(({ line, rule }) => [line, rule]).sort(), [
+      [1, "cmdk-import"], [2, "radix-toggle-import"], [3, "lucide-chevron"],
+      [4, "aria-expanded"], [5, "aria-expanded"],
+    ].sort());
+  });
+  it("scans real HTML tags and attributes but ignores quoted attribute contents and comments", () => {
+    const source = [
+      '<!-- <select aria-expanded="true"> -->',
+      `<div title="<select> aria-expanded=true import 'cmdk'">`,
+      '<details data-note="<select>">',
+      '<select aria-expanded="false"></select>',
+      '</details></div>',
+    ].join("\n");
+    assert.deepEqual(scan(source, "a.html").map(({ line, rule }) => [line, rule]).sort(), [
+      [3, "details-element"], [4, "native-select"], [4, "aria-expanded"],
+    ].sort());
+  });
+  it("keeps adjacent string tokens separate and scans nested expressions in HTML scripts", () => {
+    assert.deepEqual(scan(`import "safe-package"\n"cmdk";`, "a.js"), []);
+    assert.deepEqual(scan(`const ok = n<limit; const typed = fn<T>(); const identity = <T,>(x: T) => x;\nimport "cmdk";`, "a.ts"),
+      [{ path: "a.ts", line: 2, rule: "cmdk-import" }]);
+    const source = [
+      '<script type="module">',
+      'const text = `<select> \\` ignored ${(() => {',
+      '  /* <select> */ return { children: <select title="<details>" /> };',
+      '})()}`;',
+      'import "cmdk";',
+      '</script>',
+      '<details aria-expanded="false">Texto</details>',
+    ].join("\n");
+    assert.deepEqual(scan(source, "a.html").map(({ line, rule }) => [line, rule]).sort(), [
+      [3, "native-select"], [5, "cmdk-import"], [7, "details-element"], [7, "aria-expanded"],
+    ].sort());
+  });
+  it("keeps regex bodies and ternary strings out of findings without hiding later imports", () => {
+    const source = [
+      'const pattern = /["\\\'`{}] <select> aria-expanded=true/g;',
+      'const label = condition ? "aria-expanded" : "<details>";',
+      'const ratio = total / count;',
+      'import "cmdk";',
+      'const props = { "aria-expanded": true };',
+    ].join("\n");
+    assert.deepEqual(scan(source, "a.js").map(({ line, rule }) => [line, rule]).sort(), [
+      [4, "cmdk-import"], [5, "aria-expanded"],
+    ].sort());
+  });
+  it("attributes semicolon-free imports to the actual declaration line", () => {
+    const source = `export const unrelated = true
+import {
+  ChevronDown,
+} from "lucide-react"
+export { Command } from "cmdk"`;
+    assert.deepEqual(scan(source, "a.ts").map(({ line, rule }) => [line, rule]),
+      [[2, "lucide-chevron"], [5, "cmdk-import"]]);
+  });
   it("requires reasons, honors rule-specific allows and rejects stale entries", () => {
     const f = fixture({ "src/a.jsx": "<select aria-expanded={true}>" });
     const config = (allow) => writeFileSync(join(f.dir, "agcs-toggles.json"), JSON.stringify({ allow }));

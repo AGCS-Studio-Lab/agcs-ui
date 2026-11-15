@@ -4,9 +4,9 @@ import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { resolve, relative, sep } from "node:path";
 import { pathToFileURL } from "node:url";
 
-const defaults = ["**/node_modules/**", "**/agcs-ui/**", "**/*.{test,spec}.{js,jsx,ts,tsx,mjs,html}",
+const defaults = ["**/node_modules/**", "**/agcs-ui/**", "**/*.{test,spec}.{js,jsx,ts,tsx,mjs,cjs,html}",
   "**/{test,tests,__tests__,spec,specs,__mocks__}/**"];
-const extensions = /\.(?:js|jsx|ts|tsx|mjs|html)$/;
+const extensions = /\.(?:js|jsx|ts|tsx|mjs|cjs|html)$/;
 const ruleIds = ["aria-expanded", "details-element", "native-select", "radix-toggle-import",
   "shadcn-toggle-import", "cmdk-import", "lucide-chevron"];
 
@@ -29,29 +29,151 @@ function glob(pattern) {
   return new RegExp(`^${source}$`);
 }
 
-/** Conserva líneas y literales, borra comentarios JS, JSX y HTML. */
-function withoutComments(source) {
-  return source.replace(/(["'`])(?:\\[\s\S]|(?!\1)[^\\])*?\1|\/\*[\s\S]*?\*\/|\/\/[^\n]*|<!--[\s\S]*?-->/g,
-    (match) => /^(?:\/\*|\/\/|<!--)/.test(match) ? match.replace(/[^\n]/g, " ") : match);
+/** Máscara léxica: conserva posiciones, código y nombres de atributos, no texto.
+ * Los literales JS se guardan aparte para reconocer módulos y claves de props.
+ * No analiza tipos ni resuelve imports construidos dinámicamente.
+ */
+function executableSource(source, path) {
+  const chars = source.split("");
+  const literals = [];
+  let i = 0;
+  const mask = (start, end) => {
+    for (let at = start; at < end; at++) if (!/[\r\n]/.test(chars[at])) chars[at] = " ";
+  };
+  const comment = (end, width) => {
+    const start = i;
+    const at = source.indexOf(end, i + width);
+    i = at === -1 ? source.length : at + end.length;
+    mask(start, i);
+  };
+  const quoted = (js) => {
+    const start = i++;
+    const quote = source[start];
+    while (i < source.length) {
+      // JS escapes quotes; HTML/JSX attribute strings use entities instead.
+      if (js && source[i] === "\\") i += 2;
+      else if (source[i++] === quote) break;
+    }
+    if (js) literals.push({ start, end: i, text: source.slice(start + 1, i - 1) });
+    mask(start, i);
+    // Conserva el límite del token: dos strings no forman un solo import.
+    if (js) { chars[start] = quote; chars[i - 1] = quote; }
+  };
+  const template = () => {
+    mask(i, ++i);
+    while (i < source.length) {
+      if (source[i] === "\\") { mask(i, i + 2); i += 2; }
+      else if (source[i] === "`") { mask(i, ++i); return; }
+      else if (source.startsWith("${", i)) {
+        mask(i, i + 2); i += 2;
+        js(true);
+      } else { mask(i, i + 1); i++; }
+    }
+  };
+  const tag = () => {
+    const match = /^<\/?([\w.-]+)?/.exec(source.slice(i));
+    const name = match[1] ?? "";
+    const closing = source[i + 1] === "/";
+    i += match[0].length;
+    while (i < source.length) {
+      if (source[i] === '"' || source[i] === "'") quoted(false);
+      else if (source[i] === "{") { i++; js(true); }
+      else if (source[i] === ">") {
+        const selfClosing = source[i - 1] === "/";
+        i++;
+        return { name, closing, selfClosing };
+      } else i++;
+    }
+    return { name, closing, selfClosing: true };
+  };
+  const jsx = () => {
+    const opened = tag();
+    if (opened.selfClosing || opened.closing) return;
+    // Un genérico/assertion de TS (<T>, <T,>) no tiene cierre de elemento.
+    if (!source.slice(i).includes(`</${opened.name}`)) return;
+    while (i < source.length) {
+      if (source.startsWith("<!--", i)) comment("-->", 4);
+      else if (source.startsWith("</", i)) { tag(); return; }
+      else if (source[i] === "<" && /[\w>]/.test(source[i + 1] ?? "")) jsx();
+      else if (source[i] === "{") { i++; js(true); }
+      else { mask(i, i + 1); i++; }
+    }
+  };
+  const startsExpression = () => {
+    // Una comparación o un argumento de tipo (n<limit, fn<T>) no abre JSX.
+    const before = chars.slice(0, i).join("").trimEnd();
+    return !before || /[=([{,:;!?&|>+*/%~^-]$/.test(before) || /\b(?:return|yield|case)$/.test(before);
+  };
+  const regexp = () => {
+    const start = i++;
+    let characterClass = false;
+    while (i < source.length) {
+      const ch = source[i++];
+      if (ch === "\\") i++;
+      else if (ch === "[") characterClass = true;
+      else if (ch === "]") characterClass = false;
+      else if (ch === "/" && !characterClass) break;
+    }
+    while (/[a-z]/i.test(source[i] ?? "")) i++;
+    mask(start, i);
+    chars[start] = "0"; // Un literal sigue siendo un token, no espacio vacío.
+  };
+  function js(braced = false, script = false) {
+    let depth = 0;
+    while (i < source.length) {
+      if (script && source.startsWith("</script", i)) return;
+      if (source.startsWith("//", i)) comment("\n", 2);
+      else if (source.startsWith("/*", i)) comment("*/", 2);
+      else if (source.startsWith("<!--", i)) comment("-->", 4);
+      else if (source[i] === "/" && startsExpression()) regexp();
+      else if (source[i] === '"' || source[i] === "'") quoted(true);
+      else if (source[i] === "`") template();
+      else if (source[i] === "<" && /[a-zA-Z>]/.test(source[i + 1] ?? "") && startsExpression()) jsx();
+      else if (source[i] === "{") { depth++; i++; }
+      else if (source[i] === "}") {
+        i++;
+        if (braced && depth === 0) return;
+        depth--;
+      } else i++;
+    }
+  }
+  if (/\.html$/.test(path)) {
+    while (i < source.length) {
+      if (source.startsWith("<!--", i)) comment("-->", 4);
+      else if (source.startsWith("//", i)) comment("\n", 2);
+      else if (source.startsWith("/*", i)) comment("*/", 2);
+      else if (source[i] === "<" && /[a-zA-Z/!]/.test(source[i + 1] ?? "")) {
+        const opened = tag();
+        if (opened.name === "script" && !opened.closing) js(false, true);
+      } else { mask(i, i + 1); i++; }
+    }
+  } else js();
+  return { code: chars.join(""), literals };
 }
 
 export function scan(source, path) {
-  const code = withoutComments(source);
+  const { code, literals } = executableSource(source, path);
   const findings = [];
   const add = (rule, at) => {
     const line = code.slice(0, at).split("\n").length;
     if (!findings.some((row) => row.line === line && row.rule === rule)) findings.push({ path, line, rule });
   };
   for (const [rule, pattern] of [
-    ["aria-expanded", /\baria-expanded["']?\s*[:=]/g],
+    ["aria-expanded", /\baria-expanded\s*[:=]/g],
     ["details-element", /<details(?=[\s>])/g],
     ["native-select", /<select(?=[\s>])/g],
   ]) for (const match of code.matchAll(pattern)) add(rule, match.index);
-  // Incluye import/export estáticos, import() y require(). Conserva el bloque
-  // completo para identificar ChevronDown, ChevronUp y sus alias.
-  const imports = /\b(?:import|export)\s+(?:[^;'"`]*?\s+from\s*)?["']([^"']+)["']|\b(?:import|require)\s*\(\s*["']([^"']+)["']\s*\)/g;
-  for (const match of code.matchAll(imports)) {
-    const module = match[1] ?? match[2];
+  for (const literal of literals) {
+    const after = code.slice(literal.end);
+    const before = code.slice(0, literal.start);
+    if (literal.text === "aria-expanded" && /[,{]\s*$/.test(before) && /^\s*:/.test(after)) add("aria-expanded", literal.start);
+    // Las palabras import/require dentro de texto ya están enmascaradas. Solo
+    // un literal en posición de módulo puede producir un hallazgo de import.
+    const declaration = /\b(?:import|export)\s+(?:(?:(?!\b(?:import|export)\b)[\w$*,{}\s])*?\bfrom\s*)?$/.exec(before);
+    const call = /\b(?:import|require)\s*\(\s*$/.exec(before);
+    const match = declaration ?? (/^\s*\)/.test(after) ? call : null);
+    if (!match) continue;
+    const module = literal.text;
     if (/^@radix-ui\/react-(?:select|popover|dropdown-menu|accordion|collapsible|navigation-menu|menubar|context-menu|hover-card)(?:\/|$)/.test(module)) add("radix-toggle-import", match.index);
     if (/(?:^|\/)components\/ui\/(?:select|popover|dropdown-menu|accordion|collapsible|command|combobox)(?:\.[cm]?[jt]sx?)?$/.test(module)) add("shadcn-toggle-import", match.index);
     if (/^cmdk(?:\/|$)/.test(module)) add("cmdk-import", match.index);

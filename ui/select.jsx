@@ -33,7 +33,7 @@ export const Select = forwardRef(
   function Select({ value, defaultValue = "", onChange, options = [], placeholder = "Seleccionar",
     emptyLabel, noResultsLabel = "Sin resultados", onCreate, createLabel = (text) => `Crear «${text}»`,
     freeText = false, onOpenChange, disabled = false, required = false, name, id, className = "",
-    onClick, onKeyDown, onBlur, ...inputProps }, ref) {
+    onClick, onKeyDown, onBlur, form, ...inputProps }, ref) {
     const uid = useId();
     const listId = `${uid}-list`;
     const rootRef = useRef(/** @type {HTMLDivElement | null} */ (null));
@@ -43,7 +43,10 @@ export const Select = forwardRef(
     const [ownValue, setOwnValue] = useState(defaultValue);
     const selectedValue = String((value !== undefined ? value : ownValue) ?? "");
     const selected = options.find((option) => String(option.value) === selectedValue);
-    const label = selected?.label ?? (freeText ? selectedValue : "");
+    // El mismo valor puede ser texto escrito o una sugerencia elegida.
+    const [textValue, setTextValue] = useState(/** @type {string | null} */ (null));
+    const label = freeText && textValue === selectedValue ? selectedValue
+      : selected?.label ?? (freeText ? selectedValue : "");
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState("");
     const [edited, setEdited] = useState(false);
@@ -85,6 +88,7 @@ export const Select = forwardRef(
     /** @param {string} next @param {SelectOption | null} option */
     function commit(next, option) {
       if (value === undefined) setOwnValue(next);
+      setTextValue(freeText && option === null ? next : null);
       onChange?.(next, option);
     }
     /** @param {number} index */
@@ -159,6 +163,35 @@ export const Select = forwardRef(
       };
     }, [expanded]);
     useEffect(() => { if (disabled && open) closeRef.current(); }, [disabled, open]);
+    const previousValueRef = useRef(selectedValue);
+    useEffect(() => {
+      // Conserva también una edición que el padre aún no ha aceptado.
+      if (previousValueRef.current !== selectedValue && textValue !== selectedValue) setTextValue(null);
+      previousValueRef.current = selectedValue;
+    }, [selectedValue, textValue]);
+    const resetRef = useRef(() => {});
+    resetRef.current = () => {
+      if (value === undefined) {
+        setOwnValue(defaultValue);
+        setTextValue(null);
+      }
+      closeRef.current();
+      setEdited(false);
+      setActive(0);
+    };
+    useEffect(() => {
+      const owner = inputRef.current?.form;
+      if (!owner) return;
+      const reset = (/** @type {Event} */ event) => {
+        // Espera la acción nativa y la cancelación de cualquier listener posterior.
+        queueMicrotask(() => {
+          if (event.defaultPrevented || inputRef.current?.form !== owner) return;
+          resetRef.current();
+        });
+      };
+      owner.addEventListener("reset", reset);
+      return () => owner.removeEventListener("reset", reset);
+    });
     useEffect(() => {
       // La consulta de búsqueda nunca satisface un valor obligatorio sin elegir.
       inputRef.current?.setCustomValidity(required && !selectedValue ? "Selecciona una opción" : "");
@@ -215,11 +248,11 @@ export const Select = forwardRef(
     return (
       <div ref={rootRef} className={`agcs-select ${className}`} data-state={expanded ? "open" : "closed"}
         onClick={(event) => { if (event.target !== inputRef.current) event.preventDefault(); }}>
-        {name && <input type="hidden" name={name} value={selectedValue} disabled={disabled} />}
+        {name && <input type="hidden" name={name} value={selectedValue} disabled={disabled} form={form} />}
         <div className="agcs-select__field" data-disabled={disabled || undefined}
           onMouseDown={(event) => { if (event.target === event.currentTarget) event.preventDefault(); }}
           onClick={(event) => { if (event.target === event.currentTarget) toggle(); }}>
-          <input {...inputProps} id={id} ref={inputRef} type="text" role="combobox"
+          <input {...inputProps} id={id} ref={inputRef} form={form} type="text" role="combobox"
             className="agcs-select__input" autoComplete="off" disabled={disabled}
             required={required && !selectedValue} aria-required={required || undefined}
             aria-expanded={expanded} aria-controls={listId} aria-autocomplete="list" aria-haspopup="listbox"

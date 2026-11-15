@@ -28,6 +28,20 @@ for (const version of REACT_VERSIONS) {
       await Promise.resolve();
       return event;
     }
+    async function settle(action) {
+      // act compilado para navegador usa MessageChannel incluso en Node. Cierra
+      // sus puertos tras drenar los microtasks para no dejar vivo el test runner.
+      const NativeChannel = globalThis.MessageChannel;
+      const channels = [];
+      globalThis.MessageChannel = class extends NativeChannel {
+        constructor() { super(); channels.push(this); }
+      };
+      try { await lib.act(async () => { action(); await Promise.resolve(); }); }
+      finally {
+        globalThis.MessageChannel = NativeChannel;
+        for (const channel of channels) { channel.port1.close(); channel.port2.close(); }
+      }
+    }
     for (const explicit of [false, true]) {
       const labeling = explicit ? "label for=id" : "wrapping label";
       it(`${labeling}: option clicks commit and cancel label activation`, async () => {
@@ -144,6 +158,188 @@ for (const version of REACT_VERSIONS) {
           assert.equal(input.getAttribute("aria-expanded"), "false");
         } finally { view.unmount(); }
       });
+    }
+    it("external form association submits the selected value and omits disabled controls", () => {
+      for (const disabled of [false, true]) {
+        const view = mount(lib, lib.createElement("div", null,
+          lib.createElement("form", { id: "external-area" }),
+          lib.createElement(lib.Select, { options, form: "external-area", name: "area", defaultValue: "c", disabled })));
+        try {
+          const form = view.$("form");
+          assert.equal(view.$('[role="combobox"]').form, form);
+          assert.deepEqual([...new window.FormData(form)], disabled ? [] : [["area", "c"]]);
+          assert.equal(view.$('[type="hidden"]').form, form);
+          if (!disabled) {
+            view.act(() => keyDown(view.$('[role="combobox"]'), "ArrowDown"));
+            view.act(() => keyDown(view.$('[role="combobox"]'), "Home"));
+            view.act(() => keyDown(view.$('[role="combobox"]'), "Enter"));
+            assert.deepEqual([...new window.FormData(form)], [["area", "a"]]);
+          }
+        } finally { view.unmount(); }
+      }
+    });
+    for (const external of [false, true]) {
+      it(`form reset restores uncontrolled state, display and submission (${external ? "external" : "nested"})`, async () => {
+        const changes = [];
+        const select = lib.createElement(lib.Select, { options, name: "area", defaultValue: "a",
+          form: external ? "reset-area" : undefined, onChange: (...args) => changes.push(args) });
+        const view = mount(lib, external
+          ? lib.createElement("div", null, lib.createElement("form", { id: "reset-area" }), select)
+          : lib.createElement("form", null, select));
+        const input = view.$('[role="combobox"]');
+        const form = view.$("form");
+        try {
+          for (let reset = 0; reset < 2; reset++) {
+            view.act(() => keyDown(input, "ArrowDown"));
+            view.act(() => keyDown(input, "End"));
+            view.act(() => keyDown(input, "Enter"));
+            type(view, "unfinished search");
+            await settle(() => form.reset());
+            assert.equal(input.value, "Árbol");
+            assert.equal(input.getAttribute("aria-expanded"), "false");
+            assert.equal(view.$('[aria-selected="true"]').textContent, "ÁrbolMéxico");
+            assert.deepEqual([...new window.FormData(form)], [["area", "a"]]);
+          }
+          assert.deepEqual(changes, [["c", options[2]], ["c", options[2]]]);
+          // A listener later in propagation may cancel the native default action.
+          const cancel = (event) => event.preventDefault();
+          view.container.addEventListener("reset", cancel);
+          type(view, "ca");
+          await settle(() => form.reset());
+          assert.equal(input.value, "ca");
+          assert.equal(input.getAttribute("aria-expanded"), "true");
+          view.container.removeEventListener("reset", cancel);
+          await settle(() => { form.reset(); form.reset(); });
+          assert.equal(input.value, "Árbol");
+          assert.deepEqual([...new window.FormData(form)], [["area", "a"]]);
+        } finally { view.unmount(); }
+      });
+    }
+    it("form reset preserves controlled values and resets free text to its default suggestion", async () => {
+      for (const controlled of [false, true]) {
+        const changes = [];
+        const view = mount(lib, lib.createElement("form", null,
+          lib.createElement(lib.Select, { options, name: "area", defaultValue: "a", freeText: true,
+            ...(controlled ? { value: "c" } : {}), onChange: (...args) => changes.push(args) })));
+        try {
+          const input = view.$('[role="combobox"]');
+          type(view, "new text");
+          view.act(() => keyDown(input, "Escape"));
+          await settle(() => view.$("form").reset());
+          assert.equal(input.value, controlled ? "Café" : "Árbol");
+          assert.deepEqual([...new window.FormData(view.$("form"))], [["area", controlled ? "c" : "a"]]);
+          assert.deepEqual(changes, [["new text", null]]);
+          type(view, "another edit");
+          view.act(() => keyDown(input, "Escape"));
+          assert.equal(input.value, controlled ? "Café" : "another edit");
+        } finally { view.unmount(); }
+      }
+    });
+    it("reset uses current defaults and form association across renders and survives reset-handler updates", async () => {
+      let setSettings;
+      function Field() {
+        const [settings, update] = lib.useState({ form: "first", defaultValue: "a" });
+        const [resets, setResets] = lib.useState(0);
+        setSettings = update;
+        return lib.createElement("div", null,
+          lib.createElement("form", { id: "first" }),
+          lib.createElement("form", { id: "second", onReset: () => setResets((n) => n + 1) }),
+          lib.createElement("span", { "data-resets": true }, resets),
+          lib.createElement(lib.Select, { options, name: "area", ...settings }));
+      }
+      const view = mount(lib, lib.createElement(Field));
+      try {
+        const input = view.$('[role="combobox"]');
+        view.act(() => keyDown(input, "ArrowDown"));
+        view.act(() => keyDown(input, "End"));
+        view.act(() => keyDown(input, "Enter"));
+        view.act(() => setSettings({ form: "second", defaultValue: "a" }));
+        await settle(() => view.$("#first").reset());
+        assert.equal(input.value, "Café");
+        view.act(() => view.$("#second").reset());
+        await settle(() => {});
+        assert.equal(input.value, "Árbol");
+        assert.equal(view.$('[data-resets]').textContent, "1");
+        view.act(() => setSettings({ form: "second", defaultValue: "c" }));
+        await settle(() => view.$("#second").reset());
+        assert.equal(input.value, "Café");
+        assert.deepEqual([...new window.FormData(view.$("#second"))], [["area", "c"]]);
+        // A queued reset cannot update an unmounted field.
+        view.act(() => { view.$("#second").reset(); });
+      } finally { view.unmount(); }
+      await settle(() => {});
+    });
+    it("a controlled parent can replace a typed id with another suggestion and return to the original id", () => {
+      let setValue;
+      function Field() {
+        const [value, update] = lib.useState("a");
+        setValue = update;
+        return lib.createElement(lib.Select, { options, value, freeText: true, onChange: update });
+      }
+      const view = mount(lib, lib.createElement(Field));
+      const input = view.$('[role="combobox"]');
+      try {
+        type(view, "a");
+        view.act(() => keyDown(input, "Escape"));
+        assert.equal(input.value, "a");
+        view.act(() => setValue("c"));
+        assert.equal(input.value, "Café");
+        view.act(() => setValue("a"));
+        assert.equal(input.value, "Árbol");
+      } finally { view.unmount(); }
+    });
+    it("keeps typed id provenance when a controlled parent accepts the edit later", () => {
+      let accept;
+      function Field() {
+        const [value, setValue] = lib.useState("");
+        return lib.createElement(lib.Select, { options, value, freeText: true,
+          onChange: (next) => { accept = () => setValue(next); } });
+      }
+      const view = mount(lib, lib.createElement(Field));
+      try {
+        const input = view.$('[role="combobox"]');
+        type(view, "a");
+        view.act(() => accept());
+        view.act(() => keyDown(input, "Escape"));
+        assert.equal(input.value, "a");
+      } finally { view.unmount(); }
+    });
+    for (const controlled of [false, true]) {
+      for (const closing of ["blur", "Escape", "Tab", "outside"]) {
+        it(`free text matching an option id stays literal on ${closing} (${controlled ? "controlled" : "uncontrolled"})`, () => {
+          const choices = [{ value: "ops", label: "Operaciones" }];
+          const changes = [];
+          function Field() {
+            const [value, setValue] = lib.useState("");
+            return lib.createElement(lib.Select, { options: choices, name: "area", freeText: true,
+              ...(controlled ? { value } : {}),
+              onChange: (next, option) => { changes.push([next, option]); setValue(next); } });
+          }
+          const view = mount(lib, lib.createElement(Field));
+          const input = view.$('[role="combobox"]');
+          try {
+            type(view, "ops");
+            view.act(() => {
+              if (closing === "blur") focusOut(input, view.outside);
+              else if (closing === "outside") pointerDown(view.outside);
+              else keyDown(input, closing);
+            });
+            assert.equal(input.getAttribute("aria-expanded"), "false");
+            assert.equal(input.value, "ops");
+            assert.equal(view.$('[type="hidden"]').value, "ops");
+            assert.deepEqual(changes, [["ops", null]]);
+            // The same value chosen as a suggestion still displays its label.
+            view.act(() => keyDown(input, "ArrowDown"));
+            assert.equal(input.value, "ops");
+            view.act(() => keyDown(input, "Enter"));
+            assert.equal(input.value, "Operaciones");
+            assert.deepEqual(changes.at(-1), ["ops", choices[0]]);
+            type(view, "ops");
+            view.act(() => keyDown(input, "Escape"));
+            assert.equal(input.value, "ops");
+          } finally { view.unmount(); }
+        });
+      }
     }
     it("declares the editable combobox, labels, form value and forwarded input ref", () => {
       const ref = { current: null };
