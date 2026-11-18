@@ -260,3 +260,12 @@ export function clearError(diagram, id) {
 export function refreshAgcsBpmn(diagram) {
   diagram.get("agcsBpmn").refresh();
 }
+
+/* Encaja solo cuando el lienzo tiene un tamaño utilizable. */
+export function fitAgcsBpmn(diagram) {
+  const canvas = diagram.get("canvas");
+  const { clientWidth: width, clientHeight: height } = canvas.getContainer();
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) return false;
+  canvas.zoom("fit-viewport", "auto");
+  return true;
+}

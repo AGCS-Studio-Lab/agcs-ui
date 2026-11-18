@@ -119,6 +119,7 @@ setHighlight(modeler, "Task_Revisar");   // el único lime del diagrama</pre>
 import {
   agcsBpmnConfig,
   agcsBpmnModule,
+  fitAgcsBpmn,
   setHighlight,
   setError,
 } from "../ui/bpmn/agcs-bpmn.js";
@@ -438,9 +439,11 @@ const CONNECTION_ERRORS = {
 /* Encaja el diagrama a la derecha de la paleta, que ocupa la esquina
    superior izquierda del lienzo. */
 function fit(modeler, left = 140, pad = 32) {
+  if (!fitAgcsBpmn(modeler)) return;
   const canvas = modeler.get("canvas");
   const { inner, outer } = canvas.viewbox();
   const scale = Math.min(1, (outer.width - left - pad) / inner.width, (outer.height - 2 * pad) / inner.height);
+  if (!Number.isFinite(scale) || scale <= 0) return;
   canvas.viewbox({
     x: inner.x - left / scale,
     y: inner.y - pad / scale,
@@ -463,7 +466,19 @@ async function mount(container) {
   });
   const isProcess = container.dataset.diagram === "process";
   await modeler.importXML(isProcess ? PROCESS : GALLERY);
-  fit(modeler);
+  const canvasContainer = modeler.get("canvas").getContainer();
+  let lastWidth;
+  let lastHeight;
+  const refit = () => {
+    const { clientWidth: width, clientHeight: height } = canvasContainer;
+    if (width === lastWidth && height === lastHeight) return;
+    /* Guarda el tamaño antes del zoom para evitar ciclos del observador. */
+    lastWidth = width;
+    lastHeight = height;
+    fit(modeler);
+  };
+  refit();
+  new ResizeObserver(refit).observe(canvasContainer);
 
   if (isProcess) {
     setHighlight(modeler, "Task_Revisar");

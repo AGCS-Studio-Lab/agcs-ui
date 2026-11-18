@@ -155,6 +155,9 @@ refreshAgcsBpmn(modeler);
 
 Sin esta llamada, las figuras quedan con los colores del modo anterior.
 
+Usa `fitAgcsBpmn(modeler)` para encajar el diagrama: devuelve `true` al ajustar
+y `false` si el contenedor no tiene ancho y alto finitos mayores que cero.
+
 ## Qué no se cambia
 
 - **El logo de bpmn.io.** La licencia de bpmn-js pide que se vea siempre, abajo

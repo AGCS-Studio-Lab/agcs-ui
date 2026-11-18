@@ -13,6 +13,7 @@ globalThis.getComputedStyle = dom.window.getComputedStyle.bind(dom.window);
 const {
   HIGHLIGHT, ERROR, PRIORITY, readRoles, agcsBpmnConfig, stateOf, paintFor, tidyVisual,
   AgcsBpmnRenderer, AgcsBpmnOutline, agcsBpmnModule, setHighlight, setError, clearError, refreshAgcsBpmn,
+  fitAgcsBpmn,
 } = await import("../ui/bpmn/agcs-bpmn.js");
 
 const SVG = "http://www.w3.org/2000/svg";
@@ -296,6 +297,28 @@ describe("AgcsBpmnRenderer", () => {
   it("throws a clear error for an unknown id", () => {
     const { diagram } = fakeDiagram([]);
     assert.throws(() => setHighlight(diagram, "Nope"), /no existe el elemento Nope/);
+  });
+});
+
+describe("fitAgcsBpmn", () => {
+  it("skips invalid container sizes and fits once when the size is usable", () => {
+    const container = { clientWidth: 0, clientHeight: 0 };
+    const calls = [];
+    const canvas = { getContainer: () => container, zoom: (...args) => calls.push(args) };
+    const diagram = { get: (name) => {
+      assert.equal(name, "canvas");
+      return canvas;
+    } };
+
+    for (const [width, height] of [[0, 0], [0, 480], [640, 0], [NaN, 480], [640, NaN], [Infinity, 480], [640, Infinity], [-1, 480], [640, -1]]) {
+      Object.assign(container, { clientWidth: width, clientHeight: height });
+      assert.equal(fitAgcsBpmn(diagram), false);
+      assert.equal(calls.length, 0);
+    }
+
+    Object.assign(container, { clientWidth: 640, clientHeight: 480 });
+    assert.equal(fitAgcsBpmn(diagram), true);
+    assert.deepEqual(calls, [["fit-viewport", "auto"]]);
   });
 });
 
