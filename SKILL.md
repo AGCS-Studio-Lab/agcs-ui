@@ -28,8 +28,8 @@ Read `README.md`, then `docs/color.md`, `docs/grid.md` and `ux-rules.md`. This s
 - `tokens/colors.css`, `tokens/shadcn.css`, `tokens/tailwind-v4.css`, `tokens/tailwind-v3.cjs`, `tokens/grid.css`, `tokens/fonts.css`
 - `src/palette.js`, `src/series.js`, `src/grid-chart.js`, `src/color-math.js`
 - `tools/check-palette.mjs` -- the tests every change passes
-- `docs/color.md`, `docs/grid.md`, `ux-rules.md`
-- `ui/` -- brand primitives apps copy into `src/components/brand/`; `ui/disclosure.jsx` + `ui/disclosure.css` is the menu and disclosure, `ui/select.jsx` + `ui/select.css` the choice field, and `ui/link.css` the text links, copied as is
-- `tests/` -- `npm test` runs Menu, Disclosure and Select with React 18 and 19, and checks the rules of `ui/disclosure.css`, `ui/select.css` and `ui/link.css`, plus the toggle checker
+- `docs/color.md`, `docs/grid.md`, `docs/bpmn.md`, `ux-rules.md`
+- `ui/` -- brand primitives apps copy into `src/components/brand/`; `ui/disclosure.jsx` + `ui/disclosure.css` is the menu and disclosure, `ui/select.jsx` + `ui/select.css` the choice field, `ui/link.css` the text links, and `ui/bpmn/` (`agcs-bpmn.css` + `agcs-bpmn.js`) the bpmn-js 18.31.1 theme, copied as is
+- `tests/` -- `npm test` runs Menu, Disclosure and Select with React 18 and 19, and checks the rules of `ui/disclosure.css`, `ui/select.css`, `ui/link.css` and the BPMN theme, plus the toggle checker
 - `preview/` -- the Design System cards
-- `reference/paleta-dashboards.html`, `reference/grid-apps.html`, `reference/menu-disclosure.html`, `reference/links.html` -- the pages the decisions were made on
+- `reference/paleta-dashboards.html`, `reference/grid-apps.html`, `reference/menu-disclosure.html`, `reference/links.html`, `reference/bpmn.html` -- the pages the decisions were made on

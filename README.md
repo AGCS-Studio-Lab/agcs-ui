@@ -28,7 +28,7 @@ y reglas de UX. Donde algo de aquí choque con la marca, se corrige aquí.
 | `src/grid-chart.js` | Geometría de un gráfico de barras alineado con el grid. |
 | `src/color-math.js` | Distancia entre colores, simulación de daltonismo, contraste WCAG y APCA. |
 | `tools/check-palette.mjs` | Prueba toda la paleta. Ningún color cambia sin pasarla. |
-| `tests/` | Pruebas del menú y el disclosure con React 18 y 19, y de las reglas de `ui/disclosure.css` y `ui/link.css` (`npm test`). |
+| `tests/` | Pruebas del menú y el disclosure con React 18 y 19, de las reglas de `ui/disclosure.css` y `ui/link.css`, y del tema BPMN (`ui/bpmn/`) (`npm test`). |
 | `.github/workflows/pruebas.yml` | Corre `npm test` y `npm run check` en cada PR a `main` y en cada push a `main`. |
 | `docs/color.md` | Las reglas de color y las decisiones del 24 de septiembre de 2026. |
 | `docs/grid.md` | Dónde va el grid en una app y las condiciones para ponerlo detrás de un gráfico. |
@@ -36,11 +36,14 @@ y reglas de UX. Donde algo de aquí choque con la marca, se corrige aquí.
 | `SKILL.md` | Instrucciones para agentes: reglas duras y archivos clave. |
 | `preview/` | Tarjetas del panel del design system en Claude Design. |
 | `fonts/` | Las cinco caras que usan las apps, copiadas de agcs-design-system. |
-| `ui/` | Primitivos de marca para copiar en cada app: chevron, footer, stamp de Lab, ícono, el menú y disclosure (`disclosure.jsx` con `disclosure.css`), Select (`select.jsx` con `select.css`) y los enlaces (`link.css`). |
+| `ui/` | Primitivos de marca para copiar en cada app: chevron, footer, stamp de Lab, ícono, el menú y disclosure (`disclosure.jsx` con `disclosure.css`), Select (`select.jsx` con `select.css`), los enlaces (`link.css`) y el tema BPMN (`bpmn/`). |
 | `reference/paleta-dashboards.html` | La página con la que se decidió la paleta: dashboard de muestra, simulación de daltonismo y pruebas. Se abre en el navegador. |
 | `reference/grid-apps.html` | La página con la que se decidió el grid: los cuatro lugares, tres densidades y el gráfico alineado. |
 | `reference/menu-disclosure.html` | La página con la que se decidió el menú y el disclosure: cuándo es cada uno, sus estados y el móvil. |
 | `reference/links.html` | La página con la que se decidieron los enlaces en tinta: cómo eran, sus estados en claro y oscuro, el contraste y la regla del lime. |
+| `ui/bpmn/` | Tema de AGCS para bpmn-js 18.31.1: `agcs-bpmn.css` viste el lienzo, la paleta, el context pad y el menú; `agcs-bpmn.js` dibuja con los roles, deja las esquinas rectas y pinta el único lime. |
+| `reference/bpmn.html` | Todos los elementos BPMN en estado normal, seleccionado y error, y el proceso «Apertura de cuenta digital», en claro y oscuro. Se sirve por HTTP. |
+| `docs/bpmn.md` | Cómo copiar el tema BPMN a una app, cómo marcar el lime y el error, y qué no se cambia. |
 | `docs/capturas/` | Capturas del menú y el disclosure con React 19 y 18, y de los enlaces antes del cambio (`links/antes/`). |
 
 ## Cómo se usa
@@ -331,5 +334,8 @@ Revisa también el grid. Si algo falla, el cambio no entra.
   azul.
 - **v0.6 (11 nov 2026):** Select compartido con búsqueda, creación y texto libre;
   lista en la capa superior y checker de toggles para CI.
+- **v0.7 (18 nov 2026):** tema BPMN para bpmn-js 18.31.1 en `ui/bpmn/`:
+  roles, esquinas rectas, trazo de 1,5 px, un solo lime por diagrama y el
+  logo de bpmn.io visible (agcs-ui#10).
 - **Pendiente:** tipografía de pantalla, espaciado, el resto de los componentes
   y pantallas base.
