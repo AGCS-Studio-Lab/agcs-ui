@@ -1,0 +1,238 @@
+/* ============================================================
+   AGCS UI -- tema BPMN para bpmn-js 18.31.1 (Modeler y Viewer)
+   ============================================================
+   Va despues de diagram-js.css, bpmn-js.css y bpmn-font/css/bpmn.css,
+   y con tokens/colors.css y tokens/fonts.css cargados. Todo cuelga de
+   la clase `agcs-bpmn` en el contenedor que se pasa a bpmn-js, asi que
+   no toca nada fuera del diagrama.
+
+   Reglas: colores solo por rol, radio 0, sombra 0, foco con contorno de
+   tinta. El lime y el error los pinta agcs-bpmn.js segun las marcas
+   `agcs-highlight` y `agcs-error`; aqui solo va la etiqueta del error.
+
+   El logo de bpmn.io (a.bjs-powered-by) es parte de la licencia de
+   bpmn-js: se ve siempre. Aqui solo toma un color de rol para que se
+   lea tambien en modo oscuro. No se oculta, no se mueve, no se tapa.
+   ============================================================ */
+
+.agcs-bpmn {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+/* ---- Tokens de bpmn.io llevados a los roles de AGCS ------------- */
+.agcs-bpmn .bio-theme-parent,
+.agcs-bpmn .djs-parent,
+.agcs-bpmn .bjs-container {
+  --bio-surface: var(--surface);
+  --bio-surface-overlay: var(--surface);
+  --bio-surface-subtle: var(--surface-2);
+  --bio-surface-medium: var(--surface-2);
+  --bio-surface-inverted: var(--ink);
+  --bio-surface-inverted-subtle: var(--ink-2);
+  --bio-text: var(--ink);
+  --bio-text-subtle: var(--ink-2);
+  --bio-text-subtlest: var(--ink-3);
+  --bio-text-on-inverted: var(--surface);
+  --bio-text-on-primary: var(--surface);
+  --bio-border: var(--field-edge);
+  --bio-border-disabled: var(--rule);
+  --bio-primary: var(--ink);
+  --bio-primary-surface: var(--surface-2);
+  --bio-danger: var(--text-error);
+  --bio-danger-surface-subtle: var(--surface);
+  --bio-selected-surface: var(--ink);
+  --bio-selected-text: var(--surface);
+  --bio-focus: var(--ink);
+  --bio-focus-surface: var(--surface);
+  --bio-canvas-accent: var(--ink);
+  --bio-canvas-accent-subtle: var(--ink-3);
+  --bio-shadow: transparent;
+  --bio-shadow-subtle: transparent;
+  --bio-radius-sm: 0;
+  --bio-radius-md: 0;
+  --bio-radius-lg: 0;
+}
+
+.agcs-bpmn .djs-parent,
+.agcs-bpmn .bjs-container {
+  --accent-color: var(--ink);
+  --button-border-radius: 0;
+  --input-border-radius: 0;
+  --surface-border-radius: 0;
+  --canvas-fill-color: var(--surface);
+  --element-selected-outline-stroke-color: var(--ink);
+  --element-selected-outline-secondary-stroke-color: var(--ink-3);
+  --lasso-fill-color: transparent;
+  --lasso-stroke-color: var(--ink);
+  --snap-line-stroke-color: var(--ink-3);
+  --shape-drop-not-allowed-fill-color: var(--rule);
+  --popup-border-color: var(--ink);
+  --popup-scrollbar-thumb-color: var(--ink-3);
+  --search-preselected-background-color: var(--surface-2);
+  --bjs-font-family: var(--font-title);
+  --breadcrumbs-font-family: var(--font-title);
+  --popup-font-family: var(--font-title);
+  --search-font-family: var(--font-title);
+  --hover-tooltip-font-family: var(--font-title);
+}
+
+/* ---- Radio 0 y sombra 0 donde bpmn.io los escribe sin variable --- */
+.agcs-bpmn .djs-hover-tooltip,
+.agcs-bpmn .djs-palette,
+.agcs-bpmn .djs-palette-tooltip-shortcut,
+.agcs-bpmn .djs-context-pad .entry,
+.agcs-bpmn .djs-popup,
+.agcs-bpmn .djs-popup-search input,
+.agcs-bpmn .djs-popup-header .entry,
+.agcs-bpmn .djs-popup-breadcrumbs-item--back,
+.agcs-bpmn .djs-popup-body .entry,
+.agcs-bpmn .djs-popup-body .entry-header,
+.agcs-bpmn .djs-popup *::-webkit-scrollbar-thumb,
+.agcs-bpmn .djs-popup-entry-docs,
+.agcs-bpmn .djs-tooltip-error,
+.agcs-bpmn .djs-search-container,
+.agcs-bpmn .djs-search-input input,
+.agcs-bpmn .bjs-breadcrumbs,
+.agcs-bpmn .bjs-drilldown {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.agcs-bpmn .djs-palette-tooltip-shortcut,
+.agcs-bpmn .djs-search-result-secondary {
+  font-family: var(--font-mono);
+}
+
+/* ---- Paleta ------------------------------------------------------ */
+.agcs-bpmn .djs-palette {
+  background: var(--surface);
+  border: 1px solid var(--ink);
+}
+
+.agcs-bpmn .djs-palette .entry,
+.agcs-bpmn .djs-palette .djs-palette-toggle {
+  color: var(--ink);
+}
+
+.agcs-bpmn .djs-palette .separator {
+  border-bottom-color: var(--rule);
+}
+
+.agcs-bpmn .djs-palette .entry:hover,
+.agcs-bpmn .djs-palette .djs-palette-toggle:hover,
+.agcs-bpmn .djs-palette .highlighted-entry {
+  background: var(--ink);
+  color: var(--surface) !important;
+}
+
+/* ---- Context pad -------------------------------------------------- */
+.agcs-bpmn .djs-context-pad .entry {
+  background: var(--surface);
+  color: var(--ink);
+  outline: 1px solid var(--rule);
+}
+
+.agcs-bpmn .djs-context-pad .entry:hover {
+  background: var(--ink);
+  color: var(--surface);
+}
+
+/* ---- Menu emergente ---------------------------------------------- */
+.agcs-bpmn .djs-popup {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--ink);
+}
+
+.agcs-bpmn .djs-popup .entry.selected,
+.agcs-bpmn .djs-popup-header .entry.active {
+  background: var(--ink);
+  color: var(--surface);
+}
+
+.agcs-bpmn .djs-popup-search input {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--field-edge);
+}
+
+/* ---- Etiquetas sobre el lienzo ----------------------------------- */
+.agcs-bpmn .djs-hover-tooltip {
+  background: var(--ink);
+  color: var(--surface);
+}
+
+.agcs-bpmn .djs-tooltip-error {
+  background: var(--surface);
+  color: var(--text-error);
+  border: 1px solid var(--text-error);
+}
+
+/* Edicion de texto en el lienzo: bpmn-js escribe blanco y gris en linea. */
+.agcs-bpmn .djs-direct-editing-parent {
+  background-color: var(--surface) !important;
+  border-color: var(--field-edge) !important;
+  border-radius: 0 !important;
+  color: var(--ink) !important;
+}
+
+/* ---- Estados de los elementos del diagrama ------------------------ */
+/* Hover: opacidad .7. Pool y lane no se aclaran: casi siempre hay hover
+   sobre ellos mientras se trabaja adentro. */
+.agcs-bpmn .djs-shape.hover > .djs-visual:not(.agcs-bpmn-pool),
+.agcs-bpmn .djs-connection.hover > .djs-visual {
+  opacity: 0.7;
+}
+
+/* Seleccion: contorno recto. El color sale de las variables de arriba:
+   tinta para uno, --ink-3 cuando hay varios seleccionados. */
+.agcs-bpmn .djs-outline,
+.agcs-bpmn .djs-selection-outline,
+.agcs-bpmn .djs-resizer-visual,
+.agcs-bpmn .djs-segment-dragger .djs-visual {
+  rx: 0;
+  ry: 0;
+}
+
+.agcs-bpmn .djs-resizer-visual,
+.agcs-bpmn .djs-bendpoint .djs-visual,
+.agcs-bpmn .djs-segment-dragger .djs-visual {
+  fill: var(--ink);
+  stroke: var(--surface);
+}
+
+/* Error: el trazo lo pinta agcs-bpmn.js en --text-error. Esta es la
+   etiqueta escrita que lo acompana (setError). */
+.agcs-bpmn .agcs-bpmn-error {
+  display: inline-block;
+  padding: 2px 6px;
+  background: var(--state-risk-bg);
+  color: var(--state-risk-ink);
+  font: 500 11px/1.2 var(--font-mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-radius: 0;
+  pointer-events: none;
+}
+
+/* ---- Foco --------------------------------------------------------- */
+.agcs-bpmn .djs-palette .entry:focus-visible,
+.agcs-bpmn .djs-context-pad .entry:focus-visible,
+.agcs-bpmn .djs-popup .entry:focus-visible,
+.agcs-bpmn .djs-popup-search input:focus-visible,
+.agcs-bpmn .djs-popup-tab:focus-visible,
+.agcs-bpmn .djs-popup-breadcrumbs-item:focus-visible,
+.agcs-bpmn .djs-search-input input:focus-visible,
+.agcs-bpmn .bjs-breadcrumbs a.bjs-crumb:focus-visible,
+.agcs-bpmn .bjs-drilldown:focus-visible,
+.agcs-bpmn .bjs-powered-by:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* ---- Logo de bpmn.io: visible siempre (licencia) ----------------- */
+.agcs-bpmn .bjs-powered-by {
+  color: var(--ink-2) !important;
+}
