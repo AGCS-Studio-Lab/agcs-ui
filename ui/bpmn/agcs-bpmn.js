@@ -38,6 +38,7 @@ const ROLES = {
 const SVG_NS = "http://www.w3.org/2000/svg";
 const STROKE = "1.5px";
 const MARKER_PROPS = ["marker-start", "marker-mid", "marker-end"];
+const scaledMarkers = new WeakSet();
 
 /* Lee los roles ya resueltos en `el` (el contenedor del diagrama, que puede
    estar dentro de un bloque en modo oscuro). Si el rol no existe, por
@@ -99,7 +100,7 @@ function markerId(value) {
    trazos con otro ancho (fin 4 px, call activity 5 px) son semantica BPMN
    y no se tocan. */
 export function tidyVisual(gfx) {
-  const scaled = new Set();
+  const svg = gfx.ownerSVGElement;
   for (const node of gfx.querySelectorAll("*")) {
     if (node.localName === "rect") {
       node.setAttribute("rx", "0");
@@ -112,10 +113,13 @@ export function tidyVisual(gfx) {
     else node.setAttribute("stroke-width", STROKE);
     for (const prop of MARKER_PROPS) {
       const id = markerId((style && style.getPropertyValue(prop)) || node.getAttribute(prop));
-      if (!id || scaled.has(id)) continue;
-      const marker = [...gfx.querySelectorAll("marker")].find((item) => item.getAttribute("id") === id);
-      if (!marker) continue;
-      scaled.add(id);
+      if (!id) continue;
+      // bpmn-js guarda las flechas compartidas en los defs del lienzo.
+      const marker = svg
+        ? svg.getElementById(id)
+        : [...gfx.querySelectorAll("marker")].find((item) => item.getAttribute("id") === id);
+      if (marker?.localName !== "marker" || scaledMarkers.has(marker) || marker.getAttribute("markerUnits") === "userSpaceOnUse") continue;
+      scaledMarkers.add(marker);
       for (const size of ["markerWidth", "markerHeight"]) {
         const value = parseFloat(marker.getAttribute(size));
         if (Number.isFinite(value)) marker.setAttribute(size, String((value * 4) / 3));
@@ -228,10 +232,11 @@ function find(diagram, id) {
 
 /* Marca el unico lime del diagrama. `null` lo quita. */
 export function setHighlight(diagram, id) {
+  const element = id == null ? null : find(diagram, id);
   const canvas = diagram.get("canvas");
   const marked = diagram.get("elementRegistry").filter((item) => canvas.hasMarker(item, HIGHLIGHT));
   for (const item of marked) canvas.removeMarker(item, HIGHLIGHT);
-  if (id != null) canvas.addMarker(find(diagram, id), HIGHLIGHT);
+  if (element) canvas.addMarker(element, HIGHLIGHT);
 }
 
 /* Trazo en --text-error y una etiqueta escrita: el color nunca va solo.

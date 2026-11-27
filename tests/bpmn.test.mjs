@@ -211,6 +211,35 @@ describe("tidyVisual", () => {
     assert.equal(Number(marker.getAttribute("markerWidth")).toFixed(3), (40 / 3).toFixed(3));
     assert.equal(Number(marker.getAttribute("markerHeight")).toFixed(3), (40 / 3).toFixed(3));
   });
+
+  it("scales a shared arrowhead once across connections and redraws", () => {
+    const svg = document.createElementNS(SVG, "svg");
+    svg.innerHTML = `
+      <defs>
+        <marker id="shared" markerWidth="6" markerHeight="9"></marker>
+        <marker id="fixed" markerUnits="userSpaceOnUse" markerWidth="6" markerHeight="9"></marker>
+        <marker id="unused" markerWidth="6" markerHeight="9"></marker>
+      </defs>
+      <g><path stroke-width="2" marker-end="url(#shared)"></path></g>
+      <g><path style="stroke-width: 2px; marker-start: url('#shared')" marker-end="url(#fixed)"></path></g>`;
+    const [shared, fixed, unused] = svg.querySelectorAll("marker");
+    const [first, second] = svg.querySelectorAll("g");
+    tidyVisual(first);
+    assert.equal(shared.getAttribute("markerWidth"), "8");
+    assert.equal(shared.getAttribute("markerHeight"), "12");
+
+    tidyVisual(second);
+    first.innerHTML = `<path stroke-width="2" marker-end="url(#shared)"></path>`;
+    tidyVisual(first);
+    assert.equal(first.firstElementChild.getAttribute("stroke-width"), "1.5px");
+    assert.equal(second.firstElementChild.style.strokeWidth, "1.5px");
+    assert.equal(shared.getAttribute("markerWidth"), "8");
+    assert.equal(shared.getAttribute("markerHeight"), "12");
+    for (const marker of [fixed, unused]) {
+      assert.equal(marker.getAttribute("markerWidth"), "6");
+      assert.equal(marker.getAttribute("markerHeight"), "9");
+    }
+  });
 });
 
 describe("AgcsBpmnRenderer", () => {
@@ -248,6 +277,16 @@ describe("AgcsBpmnRenderer", () => {
     setHighlight(diagram, null);
     assert.equal(canvas.hasMarker(b, HIGHLIGHT), false);
     assert.equal(graphics.get("Task_B").firstElementChild.style.fill, "#FFFFFF");
+  });
+
+  it("keeps the current highlight when the requested element is missing", () => {
+    const task = element("Task_1", "bpmn:Task");
+    const { diagram, canvas, drawn } = fakeDiagram([task]);
+    setHighlight(diagram, task);
+    assert.throws(() => setHighlight(diagram, "Missing"), /no existe el elemento Missing/);
+    assert.ok(canvas.hasMarker(task, HIGHLIGHT));
+    assert.equal(drawn.length, 1);
+    assert.equal(drawn[0].attrs.fill, "#C8FF29");
   });
 
   it("rereads the roles after a mode change", () => {
